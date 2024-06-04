@@ -49,16 +49,21 @@ def braid(*args):
     '''
     print("braid")
 
+
 class SimulatorShell(cmd.Cmd):
 
     last_command = ""
 
-    command_options = {
-        "anyon": "anyon <name> <topological charge> <{x,y} coords>",
-        "model": "model <Ising or Fibonacci>",
-        "fusion": "fusion anyon_name_1 anyon_name_2 ...",
-        "braid": "braid anyon_name_1 anyon_name_2 ...",
-    }
+    def __init__(self):
+        super().__init__()
+        self.prompt = "simulator> "
+
+        self.command_options = {
+            "anyon": "anyon <name> <topological charge> <{x,y} coords>",
+            "model": "model <Ising or Fibonacci>",
+            "fusion": "fusion anyon_name_1 anyon_name_2 ...",
+            "braid": "braid anyon_name_1 anyon_name_2 ...",
+        }
 
     def do_shell(self, arg):
         "Run a shell command"
@@ -70,7 +75,7 @@ class SimulatorShell(cmd.Cmd):
         "Add an anyon to the simulation"
         args = arg.split(' ')
         if args[0] == "help" or args[0] == "-h":
-            print(command_options["anyon"])
+            print(self.command_options["anyon"])
         else:
             anyon(*args)
 
@@ -80,7 +85,7 @@ class SimulatorShell(cmd.Cmd):
         args = arg.split(' ')
         model(*args)
         if args[0] == "help" or args[0] == "-h":
-            print(command_options["model"])
+            print(self.command_options["model"])
         else:
             model(*args)
 
@@ -89,7 +94,7 @@ class SimulatorShell(cmd.Cmd):
         "Fuse anyons together"
         args = arg.split(' ')
         if args[0] == "help" or args[0] == "-h":
-            print(command_options["fusion"])
+            print(self.command_options["fusion"])
         else:
             fusion(*args)
 
@@ -97,7 +102,7 @@ class SimulatorShell(cmd.Cmd):
         "Braid anyons together"
         args = arg.split(' ')
         if args[0] == "help" or args[0] == "-h":
-            print(command_options["braid"])
+            print(self.command_options["braid"])
         else:
             braid(*args)
 
