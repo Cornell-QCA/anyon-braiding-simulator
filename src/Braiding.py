@@ -1,3 +1,46 @@
+import numpy as np
+
+def apply_unitary(state, unitary):
+    '''
+    Apply unitary to a given state vector
+
+    Parameters:
+        state (numpy.ndarray): State vector to which the unitary matrix will be applied
+        unitary (numpy.ndarray): Unitary matrix representing the quantum operation
+
+    Returns:
+        numpy.ndarray: Updated state vector after applying the unitary 
+    '''
+    return np.dot(unitary, state)
+
+def track_state_history(model, initial_state, operations):
+    '''
+    Track the state history of a state vector under a series of operations
+    
+    Parameters:
+        model: Instance of the Model class containing the R and F matrices
+        initial_state (numpy.ndarray): Initial state vector
+        operations (list): List of operations to be applied to the state vector
+
+    Returns:
+        list: List containing the state vectors at different time steps during the evolution
+    '''
+    state_history = [initial_state.copy()]
+    state = initial_state
+
+    # Iterate through each operation in the sequence
+    for operation in operations:
+        if operation == 'F':
+            state = apply_unitary(state, model.F_matrix)
+            state_history.append(state.copy())
+        elif operation == 'R':
+            state = apply_unitary(state, model.R_matrix)
+            state_history.append(state.copy())
+        else:
+            raise ValueError("Unknown operation")
+
+    return state_history
+
 class Braid:
     def __init__(self, anyons):
        '''
