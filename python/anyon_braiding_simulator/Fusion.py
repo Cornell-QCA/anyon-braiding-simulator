@@ -1,23 +1,28 @@
 from Anyon import Anyon
+from State import State
 
 
 class FusionPair:
     def __init__(self, anyon1: int, anyon2: int):
-        self.first = anyon1
-        self.second = anyon2
+        """
+        Creates a pair of anyons to be fused
+        Parameters:
+        anyon1 (int): Index of first anyon
+        anyon2 (int): Index of second anyon
+        """
+
+        self._first = anyon1
+        self._second = anyon2
 
 
 class Fusion:
-    def __init__(self, anyons: list[Anyon], operations: list[list[FusionPair]]):
+    def __init__(self, state: State):
         """
-        Requires: 'anyons' representing a list of 'Anyon' objects
-        Requires: 'operations' represeting a list of list of 'FusionPairs' with
         operations[t] indicating the fusions that occur at time step t.
         Constructs: A binary indexed tree 'anyons' represented in a 2D array
         """
 
-        self.anyons = None
-        pass
+        self._state = state
 
     def _verify_operations(self, anyons: list[Anyon], operations: list[list[FusionPair]]):
         """
@@ -39,7 +44,6 @@ class Fusion:
         Returns: Human-readable representation of the fusion diagram
         """
         return ''
-        # pass
 
     def qubit_enc(self):
         """
@@ -54,3 +58,8 @@ class Fusion:
         Does not affect current state of anyons
         """
         pass
+
+    def _create_anyon_tree(self, ops: list):
+        assert len(ops) == self._state.get_size() - 1
+
+        # Create the Tree

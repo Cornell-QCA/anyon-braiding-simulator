@@ -4,7 +4,6 @@ import subprocess
 
 from Anyon import Anyon
 from Braiding import Braid
-from Fusion import Fusion
 from Model import AnyonModel, Model
 from Simulator import Simulator
 
@@ -71,15 +70,17 @@ def fusion(*args):
         print('Error: Not enough arguments')
         return
 
-    fusion = Fusion(sim.list_anyons(), [])
+    # fusion = Fusion()
     cmd = args[0]
 
     if cmd.lower() == 'fuse':
-        anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
-        fusion.fuse(*anyon_indices)
+        # anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
+        # fusion.fuse(*anyon_indices)
+        pass
 
     elif cmd.lower() == 'print':
-        print(fusion)
+        # print(fusion)
+        pass
     else:
         print('Error: Unknown fusion command')
 

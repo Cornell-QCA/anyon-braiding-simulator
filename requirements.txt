@@ -34,6 +34,7 @@ llvmlite==0.42.0
 MarkupSafe==2.1.5
 matplotlib==3.9.0
 matplotlib-inline==0.1.7
+maturin==1.6.0
 mistune==3.0.2
 nbclient==0.10.0
 nbconvert==7.16.4

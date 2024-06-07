@@ -1,5 +1,5 @@
 class Anyon:
-    def __init__(self, topo_charge, name, position):
+    def __init__(self, topo_charge, name: str, position):
         """
         Parameters:
         topo_charge (String) name of topological charge of anyon
