@@ -81,7 +81,7 @@ def fusion(*args):
     elif cmd.lower() == 'print':
         print(fusion)
     else:
-        print('Error: Unknown braid command')
+        print('Error: Unknown fusion command')
 
 
 def braid(*args):
