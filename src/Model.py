@@ -24,14 +24,14 @@ class Model:
             self._r_mtx = []
             self._f_mtx = np.zeros((2,2,2,2,2,2))
             
-            self._r_mtx[1,1,0,1,1,1] = 1
-            self._r_mtx[0,1,1,1,1,1] = 1
-            self._r_mtx[1,1,1,0,1,1] = 1
-            self._r_mtx[1,0,1,1,1,1] = 1
-            self._r_mtx[0,0,0,0,0,0] = 1
+            self._f_mtx[1,1,0,1,1,1] = 1
+            self._f_mtx[0,1,1,1,1,1] = 1
+            self._f_mtx[1,1,1,0,1,1] = 1
+            self._f_mtx[1,0,1,1,1,1] = 1
+            self._f_mtx[0,0,0,0,0,0] = 1
                             
             golden = (1 + 5 ** 0.5) / 2
             goldenInv = 1/golden
-            self._r_mtx[1][1][1][1] = np.array([[goldenInv, np.sqrt(goldenInv)],[np.sqrt(goldenInv), -goldenInv]])
+            self._f_mtx[1][1][1][1] = np.array([[goldenInv, np.sqrt(goldenInv)],[np.sqrt(goldenInv), -goldenInv]])
             self._rules = []
         self._num_fusion_channels = num_fusion_channels
