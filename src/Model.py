@@ -21,7 +21,7 @@ class Model:
             self._f_mtx = []
             self._rules = []
         elif model_type == AnyonModel.Fibonacci:
-            self._r_mtx = []
+            self._r_mtx = [[cmath.exp(4*np.pi*1j/5), 0],[0, -1*cmath.exp(2*np.pi*1j/5)]]
             self._f_mtx = np.zeros((2,2,2,2,2,2))
             
             self._f_mtx[1,1,0,1,1,1] = 1
