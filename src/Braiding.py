@@ -87,6 +87,7 @@ class Braid:
         # Perform the swap if both indices are valid and the anyons are next to each other
         if index_A is not None and index_B is not None:
             self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
+            self.operations.append((index_A, index_B))  # Update the operations list
         else:
             print('The specified anyons could not be swapped')
 
@@ -97,33 +98,43 @@ class Braid:
         if not self.operations:
             print('No operations to print')
             return ''
-
+        
         # Initialize the output for each anyon
         num_anyons = len(self.anyons)
-        output = [['|' for _ in range(num_anyons)] for _ in range(len(self.operations) * 5)]
+        max_rows = len(self.operations) * 5  # Each swap occupies 5 rows
+        output = [[' ' for _ in range(num_anyons * 5)] for _ in range(max_rows)]
 
-        # Apply each recorded operation to the output
+        spacing = 4 # 3 spaces between cols
+
+        # Add '|' for non-swap columns
+        for col in range(num_anyons):
+            for step, (index_A, index_B) in enumerate(self.operations):
+                base = step * 5
+                if col != index_A and col != index_B:
+                    for i in range(5):
+                        output[base + i][col * spacing + 4] = '|'
+
         for step, (index_A, index_B) in enumerate(self.operations):
-            base = step * 5
+            base = step * 5  # Base for each swap operation
             if index_A < index_B:
-                output[base + 0][index_A] = '\\'
-                output[base + 1][index_A + 1] = '\\'
-                output[base + 2][index_A + 1] = '\\'
-                output[base + 3][index_A + 1] = '/'
-                output[base + 4][index_A] = '/'
-                output[base + 4][index_B] = '/'
-                output[base + 3][index_B - 1] = '/'
-                output[base + 2][index_B - 1] = '/'
-                output[base + 1][index_B - 1] = '\\'
+                for i in range(3):
+                    output[base + i][index_A * spacing + 4 + i * 1] = '\\'
+                    output[base + i][index_B * spacing + 4 - i * 1] = '/'
+                for i in range(3, 5):  
+                    output[base + i][index_A * spacing + 4 + (5 - i - 1) * 1] = '/'
+                    output[base + i][index_B * spacing + 4 - (5 - i - 1) * 1] = '\\'
+                    
             else:
-                output[base + 0][index_B] = '\\'
-                output[base + 1][index_B + 1] = '\\'
-                output[base + 2][index_B + 1] = '\\'
-                output[base + 3][index_B + 1] = '/'
-                output[base + 4][index_B] = '/'
-                output[base + 4][index_A] = '/'
-                output[base + 3][index_A - 1] = '/'
-                output[base + 2][index_A - 1] = '/'
-                output[base + 1][index_A - 1] = '\\'
+                for i in range(3):
+                    output[base + i][index_B * spacing + 4 + i * 1] = '\\'
+                    output[base + i][index_A * spacing + 4 - i * 1] = '/'
+                for i in range(3, 5):  
+                    output[base + i][index_B * spacing + 4 + (5 - i - 1) * 1] = '/'
+                    output[base + i][index_A * spacing + 4 - (5 - i - 1) * 1] = '\\'
 
-        return '\n'.join([' '.join(row) for row in output])
+        return '\n'.join([''.join(row) for row in output if any(c != ' ' for c in row)])
+
+# Function to test __str__ after each timestep
+def print_anyons_state(braid, description):
+    anyon_names = [anyon.name for anyon in braid.anyons]
+    print(f"{description}: [{', '.join(anyon_names)}]")
