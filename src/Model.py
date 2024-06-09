@@ -23,12 +23,12 @@ class Model:
         elif model_type == AnyonModel.Fibonacci:
             self._r_mtx = []
             self._f_mtx = np.zeros((2,2,2,2,2,2))
-
-            for i in range(2):
-                for j in range(2):
-                    for k in range(2):
-                        for l in range(2):
-                            self._r_mtx[i][j][k][l] = np.identity(2)
+            
+            self._r_mtx[1,1,0,1,1,1] = 1
+            self._r_mtx[0,1,1,1,1,1] = 1
+            self._r_mtx[1,1,1,0,1,1] = 1
+            self._r_mtx[1,0,1,1,1,1] = 1
+            self._r_mtx[0,0,0,0,0,0] = 1
                             
             golden = (1 + 5 ** 0.5) / 2
             goldenInv = 1/golden
