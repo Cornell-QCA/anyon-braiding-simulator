@@ -1,6 +1,7 @@
 # Standard Library
 from enum import Enum
-
+import cmath
+import numpy as np
 
 class AnyonModel(Enum):
     Ising = 1
@@ -13,6 +14,7 @@ class Model:
         """
         Requires: 'model_type' representing the type of model being used
 
+        The Ising model is
         """
         if model_type == AnyonModel.Ising:
             self._r_mtx = []
@@ -20,6 +22,16 @@ class Model:
             self._rules = []
         elif model_type == AnyonModel.Fibonacci:
             self._r_mtx = []
-            self._f_mtx = []
+            self._f_mtx = np.zeros((2,2,2,2,2,2))
+
+            for i in range(2):
+                for j in range(2):
+                    for k in range(2):
+                        for l in range(2):
+                            self._r_mtx[i][j][k][l] = np.identity(2)
+                            
+            golden = (1 + 5 ** 0.5) / 2
+            goldenInv = 1/golden
+            self._r_mtx[1][1][1][1] = np.array([[goldenInv, np.sqrt(goldenInv)],[np.sqrt(goldenInv), -goldenInv]])
             self._rules = []
         self._num_fusion_channels = num_fusion_channels
