@@ -2,7 +2,8 @@ use pyo3::prelude::*;
 use crate::fusion::state::State;
 
 #[pyclass]
-struct FusionPair {
+#[derive(Clone, Debug, PartialEq)]
+pub struct FusionPair {
     anyon_1: u32,
     anyon_2: u32,
 }
@@ -31,5 +32,6 @@ impl Fusion {
 
     fn __str__(&self) -> PyResult<String> {
         // Ok(format!("Fusion: {:?}", self.state))
+        Ok("Fusion".to_string())
     }
 }

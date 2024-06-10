@@ -3,6 +3,7 @@ use pyo3::prelude::*;
 /// Lazy solution for now, will properly implement a more general Topo Charge w/ specified
 /// version for each different model
 #[pyclass]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 enum IsingTopoCharge {
     Vacuum,
     Sigma,
@@ -10,7 +11,8 @@ enum IsingTopoCharge {
 }
 
 #[pyclass]
-struct Anyon {
+#[derive(Clone, Debug, PartialEq)]
+pub struct Anyon {
     #[pyo3(get)]
     name: String,
     #[pyo3(get)]
