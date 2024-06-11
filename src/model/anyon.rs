@@ -4,7 +4,7 @@ use pyo3::prelude::*;
 /// version for each different model
 #[pyclass]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
-enum IsingTopoCharge {
+pub enum IsingTopoCharge {
     Vacuum,
     Sigma,
     Psi,
@@ -19,6 +19,26 @@ pub struct Anyon {
     charge: IsingTopoCharge,
     #[pyo3(get)]
     position: (f64, f64),
+}
+
+pub trait AccessAnyon {
+    fn get_name(&self) -> String;
+    fn get_charge(&self) -> IsingTopoCharge;
+    fn get_position(&self) -> (f64, f64);
+}
+
+impl AccessAnyon for Anyon {
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn get_charge(&self) -> IsingTopoCharge {
+        self.charge.clone()
+    }
+
+    fn get_position(&self) -> (f64, f64) {
+        self.position
+    }
 }
 
 #[pymethods]

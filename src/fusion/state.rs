@@ -9,6 +9,24 @@ pub struct State {
     operations: Vec<(u32, FusionPair)>,
 }
 
+pub trait AccessState {
+    /// Get the anyons in the state
+    fn get_anyons(&self) -> Vec<Anyon>;
+
+    /// Get the operations in the state
+    fn get_operations(&self) -> Vec<(u32, FusionPair)>;
+}
+
+impl AccessState for State {
+    fn get_anyons(&self) -> Vec<Anyon> {
+        self.anyons.clone()
+    }
+
+    fn get_operations(&self) -> Vec<(u32, FusionPair)> {
+        self.operations.clone()
+    }
+}
+
 #[pymethods]
 impl State {
     #[new]
