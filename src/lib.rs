@@ -2,15 +2,12 @@ use pyo3::prelude::*;
 mod fusion;
 mod model;
 
-/// Formats the sum of two numbers as string.
-#[pyfunction]
-fn sum_as_string(a: usize, b: usize) -> PyResult<String> {
-    Ok((a + b).to_string())
-}
-
 /// A Python module implemented in Rust.
 #[pymodule]
 fn anyon_braiding_simulator(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(sum_as_string, m)?)?;
+    m.add_class::<model::model::Model>()?;
+    m.add_class::<model::model::AnyonModel>()?;
+    m.add_class::<fusion::fusion::Fusion>()?;
+    m.add_class::<fusion::fusion::FusionPair>()?;
     Ok(())
 }

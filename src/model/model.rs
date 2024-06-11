@@ -1,11 +1,20 @@
 use pyo3::prelude::*;
+use pyo3::types::PyAny;
 
 /// Different Anyon models that can be used to simulate the system
 #[pyclass]
-enum AnyonModel {
+pub enum AnyonModel {
     Ising,
     Fibonacci,
     Custom
+}
+
+impl<'a> FromPyObject< 'a> for AnyonModel {
+    fn extract(obj: &'a PyAny) -> PyResult<Self> {
+        // Example:
+        // Ok(AnyonModel { field: obj.getattr("field")?.extract()? })
+        unimplemented! ()
+    }
 }
 
 #[pymethods]
@@ -18,7 +27,7 @@ impl AnyonModel {
 
 /// The parameters accompanying a model
 #[pyclass]
-struct Model {
+pub struct Model {
     model_type: AnyonModel,
     // more fields which we'll impl later
 }

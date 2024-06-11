@@ -9,7 +9,7 @@ pub struct FusionPair {
 }
 
 #[pyclass]
-struct Fusion {
+pub struct Fusion {
     state: State,
 }
 
