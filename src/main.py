@@ -15,32 +15,54 @@ def anyon(*args):
     """
     Handle the anyon command. This command adds an anyon to the simulation.
     """
-    if len(args) < 3:
-        print('Error: Not enough arguments')
+    if len(args) != 2 and len(args) != 3:
+        print('Error: There should be either 2 or 3 arguments')
         return
 
     name = args[0]
+    topological_charge = args[1]
 
-    try:
-        topological_charge = float(args[1])
-    except ValueError:
-        print('Error: topological charge must be a number')
-        return
+    # Why is topo charge a number here? Easier if string?:
+    # try:
+    #     topological_charge = float(args[1])
+    # except ValueError:
+    #     print('Error: topological charge must be a number')
+    #     return
 
-    try:
-        position = tuple(map(float, args[2].replace('{', '').replace('}', '').split(',')))
-        position[1]
-    except ValueError:
-        print('Error: position must be formatted as {x, y} where x and y are numbers')
-        return
-    except IndexError:
-        print('Error: position must be formatted as {x, y} where x and y are numbers')
-        return
+    if len(args) == 2:
+        anyons = sim.list_anyons()
+        # Make sure any previous anyons were specified in 1D space (i.e. without a position argument)
+        if anyons and sim.get_dim_of_anyon_pos() == 2:
+            print('Error: you have already provided an anyon in 2D space, so the rest must also have a specified 2D position')
+            return
+        elif not anyons:
+            sim.switch_to_1D()
+    
+        position_1D = len(anyons)  # Index/position of new anyon in 1D
+        position = (position_1D, 0)
+        print(f'Created anyon {name} with TC {topological_charge} at position {position_1D} in 1D')
+    else:
+        # Make sure any previous anyons were specified in 2D space
+        if sim.get_dim_of_anyon_pos() == 1:
+            print('Error: you have already provided an anyon in 1D space, so the positions of the rest cannot be specified in 2D')
+            return
+        
+        try:
+            position = tuple(map(float, args[2].replace('{', '').replace('}', '').split(',')))
+            position[1]
+        except ValueError:
+            print('Error: position must be formatted as {x,y} where x and y are numbers')
+            return
+        except IndexError:
+            print('Error: position must be formatted as {x,y} where x and y are numbers')
+            return
+        
+        print(f'Created anyon {name} with TC {topological_charge} at position {position} in 2D')
 
     new_anyon = Anyon(topological_charge, name, position)
     sim.update_anyons(True, [new_anyon])
 
-    print(f'Created anyon {name} with TC {topological_charge} at position {position}')
+    
 
 
 def model(*args):
