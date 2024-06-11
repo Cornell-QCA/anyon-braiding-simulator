@@ -29,6 +29,7 @@ class Model:
             
         For details on notation, c.f.r. On classification of modular tensor
         categories by Rowell, Stong, and Wang
+        https://www.arxiv.org/abs/0712.1377
         """
         self.model_type = model_type
         
@@ -82,6 +83,10 @@ class Model:
         
         Requires that all anyons used as parameters are contained with the 
         given model
+        
+        For details on notation, c.f.r. On classification of modular tensor
+        categories by Rowell, Stong, and Wang
+        https://www.arxiv.org/abs/0712.1377
         
         Returns
         -------
