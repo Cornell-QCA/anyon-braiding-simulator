@@ -4,20 +4,24 @@ use crate::fusion::state::State;
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
 pub struct FusionPair {
-    anyon_1: u32,
-    anyon_2: u32,
+    anyon_1: usize,
+    anyon_2: usize,
 }
 
+
+impl FusionPair{
+    pub fn anyon_1(&self) -> usize{
+        self.anyon_1
+    }
+    pub fn anyon_2(&self) -> usize{
+        self.anyon_2
+    }
+}
 #[pyclass]
 pub struct Fusion {
     state: State,
 }
 
-impl Fusion {
-    fn verify_fusion_pair(&self, anyon_1: u32, anyon_2: u32) -> bool {
-        true
-    }
-}
 
 #[pymethods]
 impl Fusion {
