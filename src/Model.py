@@ -34,8 +34,9 @@ class Model:
         self.model_type = model_type
         
         if model_type == AnyonModel.Ising:
+            self._charges = {"vacuum", "sigma", "psi"}
+
             self._r_mtx = cmath.exp(-1j*np.pi/8)*np.array([[1,0],[0,1j]])
-            
             self._f_mtx = np.zeros((3,3,3,3,2,2))
             
             for i in range(3):
@@ -52,6 +53,8 @@ class Model:
             self._rules = []
             
         elif model_type == AnyonModel.Fibonacci:
+            self._charges = {"vacuum", "psi"}
+
             self._r_mtx = np.array([[cmath.exp(4*np.pi*1j/5), 0],[0, -1*cmath.exp(2*np.pi*1j/5)]])
             self._f_mtx = []
             self._rules = []
@@ -63,6 +66,12 @@ class Model:
             raise ValueError("Model type not recognized")
             
         self._num_fusion_channels = num_fusion_channels
+
+    def get_charges(self) -> set:
+        """
+        Provide the charges that are defined in this model.
+        """
+        return self._charges
         
     def getFMatrix(self, a: str, b: str, c: str, d: str) -> np.ndarray:
         
