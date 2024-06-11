@@ -1,5 +1,5 @@
-use pyo3::prelude::*;
 use crate::fusion::state::State;
+use pyo3::prelude::*;
 
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
@@ -8,12 +8,11 @@ pub struct FusionPair {
     anyon_2: usize,
 }
 
-
-impl FusionPair{
-    pub fn anyon_1(&self) -> usize{
+impl FusionPair {
+    pub fn anyon_1(&self) -> usize {
         self.anyon_1
     }
-    pub fn anyon_2(&self) -> usize{
+    pub fn anyon_2(&self) -> usize {
         self.anyon_2
     }
 }
@@ -21,7 +20,6 @@ impl FusionPair{
 pub struct Fusion {
     state: State,
 }
-
 
 #[pymethods]
 impl Fusion {

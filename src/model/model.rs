@@ -6,14 +6,14 @@ use pyo3::types::PyAny;
 pub enum AnyonModel {
     Ising,
     Fibonacci,
-    Custom
+    Custom,
 }
 
-impl<'a> FromPyObject< 'a> for AnyonModel {
+impl<'a> FromPyObject<'a> for AnyonModel {
     fn extract(obj: &'a PyAny) -> PyResult<Self> {
         // Example:
         // Ok(AnyonModel { field: obj.getattr("field")?.extract()? })
-        unimplemented! ()
+        unimplemented!()
     }
 }
 
