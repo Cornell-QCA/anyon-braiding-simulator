@@ -16,10 +16,10 @@ class Model:
 
         The Ising, Fibonacci, and Custom models correspond to 1, 2, an 3 respectively
         
-        The R matrix is implemented as a 6 dimensional array, with the 
-        first 3 indexes corresponding to the 3 lower indices of the R matrix
+        The F matrix is implemented as a 6 dimensional array, with the 
+        first 3 indexes corresponding to the 3 lower indices of the F matrix
         (which physically correspond to the anyons being fused) and the 
-        4th index corresponding to the upper index of the R matrix
+        4th index corresponding to the upper index of the F matrix
         (which physically corresponds to the anyon resulting from fusion)
         
         Indices correspond to anyon types as follows:
