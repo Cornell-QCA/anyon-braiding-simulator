@@ -30,10 +30,12 @@ class Model:
         For details on notation, c.f.r. On classification of modular tensor
         categories by Rowell, Stong, and Wang
         """
+        self.model_type = model_type
+        
         if model_type == AnyonModel.Ising:
             self._r_mtx = cmath.exp(-1j*np.pi/8)*np.array([[1,0],[0,1j]])
             
-            self._f_mtx = np.zeroes(3,3,3,3,2,2)
+            self._f_mtx = np.zeros((3,3,3,3,2,2))
             
             for i in range(3):
                 for j in range(3):
@@ -47,8 +49,66 @@ class Model:
                 self._f_mtx[1][2][2][i] = self._f_mtx[2][1][2][i] = self._f_mtx[2][2][1][i] = -1*np.identity(2)
             
             self._rules = []
+            
         elif model_type == AnyonModel.Fibonacci:
             self._r_mtx = np.array([[cmath.exp(4*np.pi*1j/5), 0],[0, -1*cmath.exp(2*np.pi*1j/5)]])
             self._f_mtx = []
             self._rules = []
+        elif model_type == AnyonModel.Custom:
+            
+            raise NotImplementedError("Custom Models not yet implemented")
+            
+        else:
+            raise ValueError("Model type not recognized")
+            
         self._num_fusion_channels = num_fusion_channels
+        
+    def getFMatrix(self, a: str, b: str, c: str, d: str) -> np.ndarray:
+        
+        '''
+        Parameters
+        ----------
+        a : str
+            name of anyon corresponding to first lower index
+        b : str
+            name of anyon corresponding to second lower index
+        c : str
+            name of anyon corresponding to third lower index
+        d : str
+            name of anyon corresponding to upper index
+
+        Only the following strings are accepted as parameters:
+        vacuum, sigma, psi
+        
+        Requires that all anyons used as parameters are contained with the 
+        given model
+        
+        Returns
+        -------
+        the F-matrix corresponding to the set of indices in the model
+        '''
+        
+        if self.model_type == AnyonModel.Ising:
+            anyondict = {
+                "vacuum": 0,
+                "sigma": 1,
+                "psi": 2}
+            
+        elif self.model_type == AnyonModel.Fibonacci:
+            anyondict = {
+                "vacuum": 0,
+                "sigma": 1,}
+            
+        elif self.model_type == AnyonModel.Custom:
+            raise NotImplementedError("Custom Models not yet implemented")
+            
+        else:
+            raise ValueError("Model type not recognized")
+            
+        inputs = {a,b,c,d}
+
+        for i in inputs:
+            if i not in anyondict:
+                raise ValueError("invalid anyon name")
+                
+        return self._f_mtx[anyondict[a], anyondict[b], anyondict[c], anyondict[d]]
