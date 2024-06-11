@@ -35,7 +35,10 @@ pub struct Model {
 #[pymethods]
 impl Model {
     #[new]
-    fn new(model_type: AnyonModel) -> Self {
-        Model { model_type }
+    fn new() -> Self {
+        // Model { model_type }
+        Model {
+            model_type: AnyonModel::Ising,
+        }
     }
 }

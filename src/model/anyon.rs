@@ -22,24 +22,25 @@ pub struct Anyon {
 }
 
 pub trait AccessAnyon {
-    fn get_name(&self) -> String;
-    fn get_charge(&self) -> IsingTopoCharge;
-    fn get_position(&self) -> (f64, f64);
+    fn name(&self) -> &str;
+    fn charge(&self) -> IsingTopoCharge;
+    fn position(&self) -> (f64, f64);
 }
 
 impl AccessAnyon for Anyon {
-    fn get_name(&self) -> String {
-        self.name.clone()
+    fn name(&self) -> &str {
+        &self.name
     }
 
-    fn get_charge(&self) -> IsingTopoCharge {
+    fn charge(&self) -> IsingTopoCharge {
         self.charge.clone()
     }
 
-    fn get_position(&self) -> (f64, f64) {
+    fn position(&self) -> (f64, f64) {
         self.position
     }
 }
+
 
 #[pymethods]
 impl Anyon {

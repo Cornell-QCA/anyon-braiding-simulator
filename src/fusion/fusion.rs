@@ -1,25 +1,40 @@
 use crate::fusion::state::State;
+use crate::fusion::state::AccessState;
 use crate::model::anyon::AccessAnyon;
 use pyo3::prelude::*;
 use std::collections::HashMap;
 
-use super::state::AccessState;
-
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
 pub struct FusionPair {
+    #[pyo3(get)]
     anyon_1: usize,
+    #[pyo3(get)]
     anyon_2: usize,
 }
 
-impl FusionPair {
-    pub fn anyon_1(&self) -> usize {
+pub trait AccessFusionPair {
+    fn anyon_1(&self) -> usize;
+    fn anyon_2(&self) -> usize;
+}
+
+impl AccessFusionPair for FusionPair {
+    fn anyon_1(&self) -> usize {
         self.anyon_1
     }
-    pub fn anyon_2(&self) -> usize {
+    fn anyon_2(&self) -> usize {
         self.anyon_2
     }
 }
+
+#[pymethods]
+impl FusionPair {
+    #[new]
+    fn new(anyon_1: usize, anyon_2: usize) -> Self {
+        FusionPair { anyon_1, anyon_2 }
+    }
+}
+
 #[pyclass]
 pub struct Fusion {
     state: State,
@@ -41,8 +56,8 @@ impl Fusion {
     /// guaranteed to be correct. Will need to impl with pytest and check the output.
     fn __str__(&self) -> PyResult<String> {
         // call state's get_anyons
-        let anyons = self.state.get_anyons();
-        let operations = self.state.get_operations();
+        let anyons = self.state.anyons();
+        let operations = self.state.operations();
 
         let active_anyons: Vec<bool> = anyons.iter().map(|_| true).collect();
 
@@ -52,7 +67,7 @@ impl Fusion {
         // Anyon names
         let top_level: String = anyons
             .iter()
-            .map(|a| format!("{} ", (*a).get_name()))
+            .map(|a| format!("{} ", (*a).name()))
             .collect();
 
         // Anyon levels

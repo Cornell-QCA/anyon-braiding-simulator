@@ -1,5 +1,5 @@
 import numpy as np
-from Anyon import Anyon
+from anyon_braiding_simulator import Anyon
 
 
 def apply_unitary(state, unitary):

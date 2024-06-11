@@ -1,28 +1,30 @@
-use crate::{fusion::fusion::FusionPair, model::anyon::Anyon};
+use crate::{fusion::fusion::FusionPair, model::anyon::Anyon, fusion::fusion::AccessFusionPair};
 use pyo3::prelude::*;
 
 /// The state of the system
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
 pub struct State {
+    #[pyo3(get)]
     anyons: Vec<Anyon>,
+    #[pyo3(get)]
     operations: Vec<(u32, FusionPair)>,
 }
 
 pub trait AccessState {
     /// Get the anyons in the state
-    fn get_anyons(&self) -> Vec<Anyon>;
+    fn anyons(&self) -> Vec<Anyon>;
 
     /// Get the operations in the state
-    fn get_operations(&self) -> Vec<(u32, FusionPair)>;
+    fn operations(&self) -> Vec<(u32, FusionPair)>;
 }
 
 impl AccessState for State {
-    fn get_anyons(&self) -> Vec<Anyon> {
+    fn anyons(&self) -> Vec<Anyon> {
         self.anyons.clone()
     }
 
-    fn get_operations(&self) -> Vec<(u32, FusionPair)> {
+    fn operations(&self) -> Vec<(u32, FusionPair)> {
         self.operations.clone()
     }
 }
@@ -44,7 +46,10 @@ impl State {
     }
 
     /// Verify the operation
+    /// TODO: Provide better error for panic when no anyons loaded
     fn verify_operation(&self, time: u32, operation: &FusionPair) -> bool {
+        assert!(operation.anyon_1() < operation.anyon_2());
+        assert!(operation.anyon_2() < self.anyons.len());
         let mut fusible_anyons = vec![true; self.anyons.len() - 1];
 
         for (t, op) in &self.operations {
