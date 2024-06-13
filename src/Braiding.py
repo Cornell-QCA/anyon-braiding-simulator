@@ -84,10 +84,10 @@ class Braid:
 
             index_A, index_B = swap
             
-            # Perform the swap if both indices are valid and the anyons are next to each other
+            # Perform the swap if indices are adjacent and not already used
             if abs(index_A - index_B) == 1 and index_A not in used_indices and index_B not in used_indices:
                 self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
-                self.operations.append((index_A, index_B))  # Update the operations list
+                self.operations.append((time, index_A, index_B))  # Update the operations list
                 used_indices.add(index_A)
                 used_indices.add(index_B)
             else:
@@ -103,38 +103,42 @@ class Braid:
         
         # Initialize the output for each anyon
         num_anyons = len(self.anyons)
-        max_rows = len(self.operations) * 5  # Each swap occupies 5 rows
+        max_time = max([op[0] for op in self.operations])  # Maximum time value
+        max_rows = max_time * 5
         output = [[' ' for _ in range(num_anyons * 5)] for _ in range(max_rows)]
-
         spacing = 4 # 3 spaces between cols
 
-        # Add '|' for non-swap columns
-        for col in range(num_anyons):
-            for step, (index_A, index_B) in enumerate(self.operations):
-                base = step * 5
-                if col != index_A and col != index_B:
+        # Iterate through each time step
+        for time_step in range(1, max_time + 1):
+            # Add '|' for non-swap columns
+            for col in range(num_anyons):
+                base = (time_step - 1) * 5
+                # Check if the column is not involved in any swap at the current time step
+                if not any(col in swap[1:3] and swap[0] == time_step for swap in self.operations):
                     for i in range(5):
                         output[base + i][col * spacing + 4] = '|'
 
-        for step, (index_A, index_B) in enumerate(self.operations):
-            base = step * 5  # Base for each swap operation
-            if index_A < index_B:
-                for i in range(3):
-                    output[base + i][index_A * spacing + 4 + i] = '\\'
-                    output[base + i][index_B * spacing + 4 - i] = '/'
-                for i in range(3, 5):  
-                    output[base + i][index_A * spacing + 4 + (5 - i - 1)] = '/'
-                    output[base + i][index_B * spacing + 4 - (5 - i - 1)] = '\\'
-                output[base + 2][index_A * spacing + 4 + 2] = '\\'
-        
-            else:
-                for i in range(3):
-                    output[base + i][index_B * spacing + 4 + i] = '\\'
-                    output[base + i][index_A * spacing + 4 - i] = '/'
-                for i in range(3, 5):  
-                    output[base + i][index_B * spacing + 4 + (5 - i - 1)] = '/'
-                    output[base + i][index_A * spacing + 4 - (5 - i - 1)] = '\\'
+            # Iterate through each swap operation at the current time step
+            for time, index_A, index_B in [op for op in self.operations if op[0] == time_step]:
+                base = (time - 1) * 5 # Base for each swap operation
+                if index_A < index_B:
+                    for i in range(3):
+                        output[base + i][index_A * spacing + 4 + i] = '\\'
+                        output[base + i][index_B * spacing + 4 - i] = '/'
+                    for i in range(3, 5):  
+                        output[base + i][index_A * spacing + 4 + (5 - i - 1)] = '/'
+                        output[base + i][index_B * spacing + 4 - (5 - i - 1)] = '\\'
+                    output[base + 2][index_A * spacing + 4 + 2] = '\\'
+            
+                else:
+                    for i in range(3):
+                        output[base + i][index_B * spacing + 4 + i] = '\\'
+                        output[base + i][index_A * spacing + 4 - i] = '/'
+                    for i in range(3, 5):  
+                        output[base + i][index_B * spacing + 4 + (5 - i - 1)] = '/'
+                        output[base + i][index_A * spacing + 4 - (5 - i - 1)] = '\\'
 
+        # Convert the output grid to a string and remove trailing empty rows
         return '\n'.join([''.join(row) for row in output if any(c != ' ' for c in row)])
 
 # Function to test __str__ after each timestep
