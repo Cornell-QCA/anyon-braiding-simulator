@@ -17,6 +17,8 @@ def test_add_anyon():
         assert anyon.charge == IsingTopoCharge.Sigma
         assert anyon.position == (0, 0)
 
+    assert len(state.anyons) == 100
+
 
 def test_add_operation():
     state = setup()

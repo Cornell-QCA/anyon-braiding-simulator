@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 mod fusion;
 mod model;
+mod util;
 
 /// A Python module implemented in Rust.
 #[pymodule]
