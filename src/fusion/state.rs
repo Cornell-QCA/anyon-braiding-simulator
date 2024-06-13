@@ -50,7 +50,7 @@ impl State {
     fn verify_operation(&self, time: u32, operation: &FusionPair) -> bool {
         assert!(operation.anyon_1() < operation.anyon_2());
         assert!(operation.anyon_2() < self.anyons.len());
-        let mut fusible_anyons = vec![true; self.anyons.len() - 1];
+        let mut fusible_anyons = vec![true; self.anyons.len()];
 
         for (t, op) in &self.operations {
             fusible_anyons[op.anyon_2()] = false;

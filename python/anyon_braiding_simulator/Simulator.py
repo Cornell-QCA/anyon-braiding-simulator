@@ -1,3 +1,6 @@
+from anyon_braiding_simulator import Anyon, Model
+
+
 class Simulator:
     def __init__(self):
         """
@@ -7,7 +10,7 @@ class Simulator:
         self._anyons = []
         self._model = None
 
-    def update_anyons(self, is_increasing: bool, anyons) -> None:
+    def update_anyons(self, is_increasing: bool, anyons: list(Anyon)) -> None:
         """
         Update the anyons stored in memory.
 
@@ -20,7 +23,7 @@ class Simulator:
         else:
             self._anyons = [anyon for anyon in self._anyons if anyon not in anyons]
 
-    def set_model(self, model) -> None:
+    def set_model(self, model: Model) -> None:
         """
         Set the model for the simulator.
         """
