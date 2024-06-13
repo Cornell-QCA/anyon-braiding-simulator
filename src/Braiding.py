@@ -64,43 +64,34 @@ class Braid:
 
         self.anyons = anyons
         self.operations = []
-        self.initial_states = []
 
-    def swap(self, anyon_A, anyon_B):
+    def swap(self, time, swaps: list[tuple[int, int]]):
         """
-        Swaps the positions of two adjacent anyons in list "anyons" based on their names
+        Swaps the positions of anyons in list "anyons" based on provided swaps to occur at a given time
 
         Parameters:
-        anyon_A (str): Name of the first anyon to swap
-        anyon_B (str): Name of the second anyon to swap
-
-        Searches for anyon with name `anyon_A` and checks if `anyon_B` is immediately next to it in the list.
-        If they are adjacent, it swaps their positions.
-        If they are not found or not adjacent, the function prints that the anyons could not be swapped.
+        time (int): Time step at which the swaps are performed
+        swaps (list): List of tuples where each tuple is a pair of anyon indices to swap
+        
+        Swaps only adjacent anyons
         """
+        used_indices = set()  # Set to keep track of used indices
 
-        # Find the index of the first anyon with name anyon_A
-        index_A = next((i for i, anyon in enumerate(self.anyons) if anyon.name == anyon_A), None)
+        for swap in swaps:
+            if len(swap) != 2:
+                print(f"Invalid swap tuple {swap} at time {time}")
+                continue
 
-        if index_A is not None:
-            # Check if the next anyon in the list is anyon_B
-            if index_A + 1 < len(self.anyons) and self.anyons[index_A + 1].name == anyon_B:
-                index_B = index_A + 1
-            # Check if the previous anyon in the list is anyon_B
-            elif index_A - 1 >= 0 and self.anyons[index_A - 1].name == anyon_B:
-                index_B = index_A - 1
+            index_A, index_B = swap
+            
+            # Perform the swap if both indices are valid and the anyons are next to each other
+            if abs(index_A - index_B) == 1 and index_A not in used_indices and index_B not in used_indices:
+                self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
+                self.operations.append((index_A, index_B))  # Update the operations list
+                used_indices.add(index_A)
+                used_indices.add(index_B)
             else:
-                index_B = None
-        else:
-            index_B = None
-
-        # Perform the swap if both indices are valid and the anyons are next to each other
-        if index_A is not None and index_B is not None:
-            self.initial_states.append([anyon.name for anyon in self.anyons])  # Record initial state before swap
-            self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
-            self.operations.append((index_A, index_B))  # Update the operations list
-        else:
-            print('The specified anyons could not be swapped')
+                print(f'The pair {swap} could not be swapped at time {time}')
 
     def __str__(self) -> str:
         """
@@ -129,19 +120,20 @@ class Braid:
             base = step * 5  # Base for each swap operation
             if index_A < index_B:
                 for i in range(3):
-                    output[base + i][index_A * spacing + 4 + i * 1] = '\\'
-                    output[base + i][index_B * spacing + 4 - i * 1] = '/'
+                    output[base + i][index_A * spacing + 4 + i] = '\\'
+                    output[base + i][index_B * spacing + 4 - i] = '/'
                 for i in range(3, 5):  
-                    output[base + i][index_A * spacing + 4 + (5 - i - 1) * 1] = '/'
-                    output[base + i][index_B * spacing + 4 - (5 - i - 1) * 1] = '\\'
-                    
+                    output[base + i][index_A * spacing + 4 + (5 - i - 1)] = '/'
+                    output[base + i][index_B * spacing + 4 - (5 - i - 1)] = '\\'
+                output[base + 2][index_A * spacing + 4 + 2] = '\\'
+        
             else:
                 for i in range(3):
-                    output[base + i][index_B * spacing + 4 + i * 1] = '\\'
-                    output[base + i][index_A * spacing + 4 - i * 1] = '/'
+                    output[base + i][index_B * spacing + 4 + i] = '\\'
+                    output[base + i][index_A * spacing + 4 - i] = '/'
                 for i in range(3, 5):  
-                    output[base + i][index_B * spacing + 4 + (5 - i - 1) * 1] = '/'
-                    output[base + i][index_A * spacing + 4 - (5 - i - 1) * 1] = '\\'
+                    output[base + i][index_B * spacing + 4 + (5 - i - 1)] = '/'
+                    output[base + i][index_A * spacing + 4 - (5 - i - 1)] = '\\'
 
         return '\n'.join([''.join(row) for row in output if any(c != ' ' for c in row)])
 
@@ -153,22 +145,11 @@ def print_anyons_state(braid, swap_number):
     Parameters:
         braid (Braid): The braid object containing the anyons and operations
         swap_number (int): The swap operation number to print
-        initial_anyons (list): The initial state of anyons before any swaps
     """
-    if swap_number <= len(braid.initial_states):
-        initial_anyons = braid.initial_states[swap_number - 1]
-    else:
-        initial_anyons = [anyon.name for anyon in braid.anyons]
-
-    print(f"Before swap {swap_number}: [{', '.join(initial_anyons)}]")
-    
     # Perform the swap operation
     if swap_number <= len(braid.operations):
-        index_A, index_B = braid.operations[swap_number - 1]
-        braid.anyons[index_A], braid.anyons[index_B] = braid.anyons[index_B], braid.anyons[index_A]
-        anyon_names = [anyon.name for anyon in braid.anyons]
         print(braid)
+        anyon_names = [anyon.name for anyon in braid.anyons]
         print(f"After swap {swap_number}: [{', '.join(anyon_names)}]")
     else:
         print("Invalid swap number")
-
