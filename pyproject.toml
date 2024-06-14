@@ -11,5 +11,9 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dynamic = ["version"]
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
+
+[tool.pyright]
+include = ["python", "target/wheels", "venv/lib/python3.12/site-packages/"]

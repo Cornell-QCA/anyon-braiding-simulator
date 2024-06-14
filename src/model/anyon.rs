@@ -45,7 +45,7 @@ impl AccessAnyon for Anyon {
 #[pymethods]
 impl Anyon {
     #[new]
-    fn new(name: String, charge: IsingTopoCharge, position: (f64, f64)) -> Self {
+    pub fn new(name: String, charge: IsingTopoCharge, position: (f64, f64)) -> Self {
         Anyon {
             name,
             charge,

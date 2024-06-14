@@ -62,12 +62,14 @@ impl Fusion {
         Fusion { state, ops }
     }
 
-    fn all_basis(&self) -> PyResult<Vec<FusionPair>> {
-        Ok(Vec::new())
+    fn all_basis(&self) -> PyResult<Vec<Basis>> {
+        unimplemented!()
     }
 
     fn verify_basis(&self, basis: &Basis) -> PyResult<bool> {
-        unimplemented!()
+        // Naive, there's better ways to improve avg performance. Will deal with
+        // it once we have the basis implementation
+        Ok(self.all_basis().unwrap().contains(basis))
     }
 
     /// Builds the fusion tree's graphical representation
