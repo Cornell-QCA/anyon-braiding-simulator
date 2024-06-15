@@ -2,10 +2,8 @@
 import cmd
 import subprocess
 
-from Anyon import Anyon
+from anyon_braiding_simulator import Anyon, AnyonModel, IsingTopoCharge, Model
 from Braiding import Braid
-from Fusion import Fusion
-from Model import AnyonModel, Model
 from Simulator import Simulator
 
 sim = Simulator()
@@ -22,7 +20,12 @@ def anyon(*args):
     name = args[0]
 
     try:
-        topological_charge = float(args[1])
+        topo_charge = {
+            'psi': IsingTopoCharge.Psi,
+            'sigma': IsingTopoCharge.Sigma,
+            'vac': IsingTopoCharge.Vacuum,
+        }
+        topological_charge = topo_charge[args[1].lower()]
     except ValueError:
         print('Error: topological charge must be a number')
         return
@@ -37,7 +40,7 @@ def anyon(*args):
         print('Error: position must be formatted as {x, y} where x and y are numbers')
         return
 
-    new_anyon = Anyon(topological_charge, name, position)
+    new_anyon = Anyon(name, topological_charge, position)
     sim.update_anyons(True, [new_anyon])
 
     print(f'Created anyon {name} with TC {topological_charge} at position {position}')
@@ -59,6 +62,7 @@ def model(*args):
 
     model_convert = {'ising': AnyonModel.Ising, 'fibonacci': AnyonModel.Fibonacci}
 
+    # TODO: figure out why this throws an error
     model = Model(model_convert[model_type.lower()])
     sim.set_model(model)
 
@@ -71,15 +75,17 @@ def fusion(*args):
         print('Error: Not enough arguments')
         return
 
-    fusion = Fusion(sim.list_anyons(), [])
+    # fusion = Fusion()
     cmd = args[0]
 
     if cmd.lower() == 'fuse':
-        anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
-        fusion.fuse(*anyon_indices)
+        # anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
+        # fusion.fuse(*anyon_indices)
+        pass
 
     elif cmd.lower() == 'print':
-        print(fusion)
+        # print(fusion)
+        pass
     else:
         print('Error: Unknown fusion command')
 
