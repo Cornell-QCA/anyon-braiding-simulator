@@ -1,6 +1,7 @@
 # Standard Library
 import cmd
 import subprocess
+import sys
 
 from Anyon import Anyon
 from Braiding import Braid
@@ -141,29 +142,21 @@ class SimulatorShell(cmd.Cmd):
             'list': 'list',
         }
 
+        # Flag to indicate whether initialization (model & anyon choice) is completed
+        self.init_completed = False
+
         # Prompt the user to input the anyon model
         while True:
-            model_input = input('Enter the anyon model ("ising" or "fibonacci"): ')
-            if model_input.lower() == 'ising' or model_input.lower() == 'fibonacci':
+            user_input = input('Enter the anyon model ("ising" or "fibonacci"): ')
+            if user_input.lower() == 'ising' or user_input.lower() == 'fibonacci':
                 break
+            elif user_input.lower() == 'exit':
+                sys.exit(0)
             else:
-                print('Error: Invalid model. Please enter either "ising" or "fibonacci"')
-        self.model(model_input)
+                print('\nError: Invalid model.')
+        model(user_input)
 
-    def model(self, *args):
-        """
-        Handle the model command. This command sets the model for the simulation.
-        """
-        if len(args) < 1:
-            print('Error: Not enough arguments')
-            return
-        model_type = str(args[0])
-        if model_type.lower() != 'ising' and model_type.lower() != 'fibonacci':
-            print('Error: Model must be Ising or Fibonacci')
-            return
-        model_convert = {'ising': AnyonModel.Ising, 'fibonacci': AnyonModel.Fibonacci}
-        model = Model(model_convert[model_type.lower()])
-        sim.set_model(model)
+        self.init_complete = True
 
     def do_shell(self, arg):
         "Run a shell command"
@@ -183,6 +176,10 @@ class SimulatorShell(cmd.Cmd):
 
     def do_model(self, arg):
         "Set the model for the simulation"
+        if self.init_complete:
+            print('Error: Cannot change model after initialization')
+            return
+        
         args = arg.split(' ')
         model(*args)
         if args[0] == 'help' or args[0] == '-h':
@@ -221,7 +218,7 @@ class SimulatorShell(cmd.Cmd):
 
     def do_help(self, arg):
         "Print help"
-        print('Commands: anyon, model, fusion, braid, exit, help')
+        print('Commands: anyon, fusion, braid, exit, help')
 
 
 if __name__ == '__main__':
