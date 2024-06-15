@@ -115,7 +115,7 @@ def braid(*args):
         print('Error: Not enough arguments')
         return
 
-    braid = Braid(sim.list_anyons())
+    braid = Braid(sim.list_anyons(), sim._model)
     cmd = args[0]
 
     if cmd.lower() == 'swap':
@@ -140,6 +140,30 @@ class SimulatorShell(cmd.Cmd):
             'braid': 'braid anyon_name_1 anyon_name_2 ...',
             'list': 'list',
         }
+
+        # Prompt the user to input the anyon model
+        while True:
+            model_input = input('Enter the anyon model ("ising" or "fibonacci"): ')
+            if model_input.lower() == 'ising' or model_input.lower() == 'fibonacci':
+                break
+            else:
+                print('Error: Invalid model. Please enter either "ising" or "fibonacci"')
+        self.model(model_input)
+
+    def model(self, *args):
+        """
+        Handle the model command. This command sets the model for the simulation.
+        """
+        if len(args) < 1:
+            print('Error: Not enough arguments')
+            return
+        model_type = str(args[0])
+        if model_type.lower() != 'ising' and model_type.lower() != 'fibonacci':
+            print('Error: Model must be Ising or Fibonacci')
+            return
+        model_convert = {'ising': AnyonModel.Ising, 'fibonacci': AnyonModel.Fibonacci}
+        model = Model(model_convert[model_type.lower()])
+        sim.set_model(model)
 
     def do_shell(self, arg):
         "Run a shell command"
