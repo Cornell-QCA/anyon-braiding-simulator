@@ -1,13 +1,25 @@
+use std::slice::SliceIndex;
+
 use pyo3::prelude::*;
 
 /// Lazy solution for now, will properly implement a more general Topo Charge w/ specified
 /// version for each different model
 #[pyclass]
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum IsingTopoCharge {
+    Psi,
     Vacuum,
     Sigma,
-    Psi,
+}
+
+impl IsingTopoCharge {
+    pub fn value(&self) -> usize {
+        match self {
+            IsingTopoCharge::Psi => 0,
+            IsingTopoCharge::Vacuum => 1,
+            IsingTopoCharge::Sigma => 2,
+        }
+    }
 }
 
 #[pyclass]
