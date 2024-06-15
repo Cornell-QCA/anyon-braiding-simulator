@@ -52,8 +52,18 @@ class Braid:
         anyons (list): List of Anyon objects
         operations (list): List of operations executed
         """
+        # Check if there are fewer than 3 anyons
+        if len(anyons) < 3:
+            raise ValueError('There must be at least 3 anyons')
+
+        # Check for duplicate anyon names
+        names = [anyon.name for anyon in anyons]
+        if len(names) != len(set(names)):
+            raise ValueError('Duplicate anyon names detected')
+
         self.anyons = anyons
         self.operations = []
+        self.initial_states = []
 
     def swap(self, anyon_A, anyon_B):
         """
@@ -85,7 +95,9 @@ class Braid:
 
         # Perform the swap if both indices are valid and the anyons are next to each other
         if index_A is not None and index_B is not None:
+            self.initial_states.append([anyon.name for anyon in self.anyons])  # Record initial state before swap
             self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
+            self.operations.append((index_A, index_B))  # Update the operations list
         else:
             print('The specified anyons could not be swapped')
 
@@ -99,30 +111,63 @@ class Braid:
 
         # Initialize the output for each anyon
         num_anyons = len(self.anyons)
-        output = [['|' for _ in range(num_anyons)] for _ in range(len(self.operations) * 5)]
+        max_rows = len(self.operations) * 5  # Each swap occupies 5 rows
+        output = [[' ' for _ in range(num_anyons * 5)] for _ in range(max_rows)]
 
-        # Apply each recorded operation to the output
+        spacing = 4  # 3 spaces between cols
+
+        # Add '|' for non-swap columns
+        for col in range(num_anyons):
+            for step, (index_A, index_B) in enumerate(self.operations):
+                base = step * 5
+                if col != index_A and col != index_B:
+                    for i in range(5):
+                        output[base + i][col * spacing + 4] = '|'
+
         for step, (index_A, index_B) in enumerate(self.operations):
-            base = step * 5
+            base = step * 5  # Base for each swap operation
             if index_A < index_B:
-                output[base + 0][index_A] = '\\'
-                output[base + 1][index_A + 1] = '\\'
-                output[base + 2][index_A + 1] = '\\'
-                output[base + 3][index_A + 1] = '/'
-                output[base + 4][index_A] = '/'
-                output[base + 4][index_B] = '/'
-                output[base + 3][index_B - 1] = '/'
-                output[base + 2][index_B - 1] = '/'
-                output[base + 1][index_B - 1] = '\\'
-            else:
-                output[base + 0][index_B] = '\\'
-                output[base + 1][index_B + 1] = '\\'
-                output[base + 2][index_B + 1] = '\\'
-                output[base + 3][index_B + 1] = '/'
-                output[base + 4][index_B] = '/'
-                output[base + 4][index_A] = '/'
-                output[base + 3][index_A - 1] = '/'
-                output[base + 2][index_A - 1] = '/'
-                output[base + 1][index_A - 1] = '\\'
+                for i in range(3):
+                    output[base + i][index_A * spacing + 4 + i * 1] = '\\'
+                    output[base + i][index_B * spacing + 4 - i * 1] = '/'
+                for i in range(3, 5):
+                    output[base + i][index_A * spacing + 4 + (5 - i - 1) * 1] = '/'
+                    output[base + i][index_B * spacing + 4 - (5 - i - 1) * 1] = '\\'
 
-        return '\n'.join([' '.join(row) for row in output])
+            else:
+                for i in range(3):
+                    output[base + i][index_B * spacing + 4 + i * 1] = '\\'
+                    output[base + i][index_A * spacing + 4 - i * 1] = '/'
+                for i in range(3, 5):
+                    output[base + i][index_B * spacing + 4 + (5 - i - 1) * 1] = '/'
+                    output[base + i][index_A * spacing + 4 - (5 - i - 1) * 1] = '\\'
+
+        return '\n'.join([''.join(row) for row in output if any(c != ' ' for c in row)])
+
+
+# Function to test __str__ after each timestep
+def print_anyons_state(braid, swap_number):
+    """
+    Print the state of anyons before and after a swap
+
+    Parameters:
+        braid (Braid): The braid object containing the anyons and operations
+        swap_number (int): The swap operation number to print
+        initial_anyons (list): The initial state of anyons before any swaps
+    """
+    if swap_number <= len(braid.initial_states):
+        initial_anyons = braid.initial_states[swap_number - 1]
+    else:
+        initial_anyons = [anyon.name for anyon in braid.anyons]
+
+    print(f"Before swap {swap_number}: [{', '.join(initial_anyons)}]")
+
+    # Perform the swap operation
+    if swap_number <= len(braid.operations):
+        index_A, index_B = braid.operations[swap_number - 1]
+        braid.anyons[index_A], braid.anyons[index_B] = braid.anyons[index_B], braid.anyons[index_A]
+        anyon_names = [anyon.name for anyon in braid.anyons]
+        print(braid)
+        print(f"After swap {swap_number}: [{', '.join(anyon_names)}]")
+    else:
+        print('Invalid swap number')
