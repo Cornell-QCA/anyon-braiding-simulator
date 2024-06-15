@@ -156,6 +156,34 @@ class SimulatorShell(cmd.Cmd):
                 print('\nError: Invalid model.')
         model(user_input)
 
+        # Prompt the user to input the anyon details
+        no_anyons = True
+        while True:
+            if no_anyons:
+                user_input = input(
+                    '\nEnter the anyon name, topological charge, and optionally, the 2D position.'
+                    '\nUse the format <name> <topological charge> <{x,y}>.\n'
+                    '> '
+                    )
+            else:
+                user_input = input(
+                    '\nContinue adding anyons, or type "done" when finished initializing.\n'
+                    '> '
+                    )
+
+            if user_input.lower() == 'exit':
+                sys.exit(0)
+            elif user_input.lower() == 'done':
+                break
+
+            args = user_input.split(' ')
+            if len(args) < 2 or len(args) > 3:
+                print('Error: There should be either 2 or 3 arguments')
+                continue
+
+            anyon(*args)
+            no_anyons = False
+
         self.init_complete = True
 
     def do_shell(self, arg):
@@ -168,6 +196,10 @@ class SimulatorShell(cmd.Cmd):
 
     def do_anyon(self, arg):
         "Add an anyon to the simulation"
+        if self.init_complete:
+            print('Error: Cannot add anyons after initialization')
+            return
+
         args = arg.split(' ')
         if args[0] == 'help' or args[0] == '-h':
             print(self.command_options['anyon'])
@@ -218,7 +250,7 @@ class SimulatorShell(cmd.Cmd):
 
     def do_help(self, arg):
         "Print help"
-        print('Commands: anyon, fusion, braid, exit, help')
+        print('Commands: fusion, braid, exit, help')
 
 
 if __name__ == '__main__':
