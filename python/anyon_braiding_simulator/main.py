@@ -3,10 +3,9 @@ import cmd
 import subprocess
 import sys
 
-from Anyon import Anyon
+from anyon_braiding_simulator import Anyon, AnyonModel, IsingTopoCharge
 from Braiding import Braid
-from Fusion import Fusion
-from Model import AnyonModel, Model
+from Model import Model
 from Simulator import Simulator
 
 sim = Simulator()
@@ -23,31 +22,41 @@ def anyon(*args):
     name = args[0]
     topological_charge = args[1]
 
-    # Why is topo charge a number here? Easier if string?:
-    # try:
-    #     topological_charge = float(args[1])
-    # except ValueError:
-    #     print('Error: topological charge must be a number')
-    #     return
+    try:
+        topo_charge = {
+            'psi': IsingTopoCharge.Psi,
+            'sigma': IsingTopoCharge.Sigma,
+            'vac': IsingTopoCharge.Vacuum,
+        }
+        topological_charge = topo_charge[args[1].lower()]
+    except ValueError:
+        print('Error: topological charge must be a number')
+        return
 
     if len(args) == 2:
         anyons = sim.list_anyons()
         # Make sure any previous anyons were specified in 1D space (i.e. without a position argument)
         if anyons and sim.get_dim_of_anyon_pos() == 2:
-            print('Error: you have already provided an anyon in 2D space, so the rest must also have a specified 2D position')
+            print(
+                'Error: you have already provided an anyon in 2D space, so the rest must also have a \
+                    specified 2D position'
+            )
             return
         elif not anyons:
             sim.switch_to_1D()
-    
+
         position_1D = len(anyons)  # Index/position of new anyon in 1D
         position = (position_1D, 0)
         print(f'Created anyon {name} with TC {topological_charge} at position {position_1D} in 1D')
     else:
         # Make sure any previous anyons were specified in 2D space
         if sim.get_dim_of_anyon_pos() == 1:
-            print('Error: you have already provided an anyon in 1D space, so the positions of the rest cannot be specified in 2D')
+            print(
+                'Error: you have already provided an anyon in 1D space, so the positions of the rest \
+                    cannot be specified in 2D'
+            )
             return
-        
+
         try:
             position = tuple(map(float, args[2].replace('{', '').replace('}', '').split(',')))
             position[1]
@@ -57,13 +66,11 @@ def anyon(*args):
         except IndexError:
             print('Error: position must be formatted as {x,y} where x and y are numbers')
             return
-        
+
         print(f'Created anyon {name} with TC {topological_charge} at position {position} in 2D')
 
-    new_anyon = Anyon(topological_charge, name, position)
+    new_anyon = Anyon(name, topological_charge, position)
     sim.update_anyons(True, [new_anyon])
-
-    
 
 
 def model(*args):
@@ -82,6 +89,7 @@ def model(*args):
 
     model_convert = {'ising': AnyonModel.Ising, 'fibonacci': AnyonModel.Fibonacci}
 
+    # TODO: figure out why this throws an error
     model = Model(model_convert[model_type.lower()])
     sim.set_model(model)
 
@@ -94,15 +102,17 @@ def fusion(*args):
         print('Error: Not enough arguments')
         return
 
-    fusion = Fusion(sim.list_anyons(), [])
+    # fusion = Fusion()
     cmd = args[0]
 
     if cmd.lower() == 'fuse':
-        anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
-        fusion.fuse(*anyon_indices)
+        # anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
+        # fusion.fuse(*anyon_indices)
+        pass
 
     elif cmd.lower() == 'print':
-        print(fusion)
+        # print(fusion)
+        pass
     else:
         print('Error: Unknown fusion command')
 
@@ -164,12 +174,9 @@ class SimulatorShell(cmd.Cmd):
                     '\nEnter the anyon name, topological charge, and optionally, the 2D position.'
                     '\nUse the format <name> <topological charge> <{x,y}>.\n'
                     '> '
-                    )
+                )
             else:
-                user_input = input(
-                    '\nContinue adding anyons, or type "done" when finished initializing.\n'
-                    '> '
-                    )
+                user_input = input('\nContinue adding anyons, or type "done" when finished initializing.\n' '> ')
 
             if user_input.lower() == 'exit':
                 sys.exit(0)
@@ -211,7 +218,7 @@ class SimulatorShell(cmd.Cmd):
         if self.init_complete:
             print('Error: Cannot change model after initialization')
             return
-        
+
         args = arg.split(' ')
         model(*args)
         if args[0] == 'help' or args[0] == '-h':

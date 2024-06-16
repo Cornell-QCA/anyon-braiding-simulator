@@ -1,3 +1,6 @@
+from anyon_braiding_simulator import Model
+
+
 class Simulator:
     def __init__(self):
         """
@@ -8,7 +11,7 @@ class Simulator:
         self._model = None
         self._dim_of_anyon_pos = 2  # Default is 2D anyon positions
 
-    def update_anyons(self, is_increasing: bool, anyons) -> None:
+    def update_anyons(self, is_increasing: bool, anyons: list) -> None:
         """
         Update the anyons stored in memory.
 
@@ -21,7 +24,7 @@ class Simulator:
         else:
             self._anyons = [anyon for anyon in self._anyons if anyon not in anyons]
 
-    def set_model(self, model) -> None:
+    def set_model(self, model: Model) -> None:
         """
         Set the model for the simulator.
         """
@@ -32,13 +35,13 @@ class Simulator:
         List the anyons currently in the simulator.
         """
         return self._anyons
-    
+
     def get_dim_of_anyon_pos(self) -> int:
         """
         Provides the dimension of anyon positions.
         """
         return self._dim_of_anyon_pos
-    
+
     def switch_to_1D(self) -> None:
         """
         Sets the dimension of anyon positions to be 1.

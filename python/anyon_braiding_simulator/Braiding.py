@@ -1,6 +1,5 @@
 import numpy as np
-
-from Anyon import Anyon
+from anyon_braiding_simulator import Anyon
 from Model import Model
 
 
@@ -56,19 +55,21 @@ class Braid:
         """
         # Check if there are fewer than 3 anyons
         if len(anyons) < 3:
-            raise ValueError("There must be at least 3 anyons")
+            raise ValueError('There must be at least 3 anyons')
 
         # Check for duplicate anyon names
         names = [anyon.name for anyon in anyons]
         if len(names) != len(set(names)):
-            raise ValueError("Duplicate anyon names detected")
-        
+            raise ValueError('Duplicate anyon names detected')
+
         # Check if all charges of given anyons are included in given model
         charges = model.get_charges()
         invalid_anyons = [anyon for anyon in anyons if anyon.topo_charge not in charges]
         if invalid_anyons:
-            names_and_charges = [f"Name: {anyon.name}, Charge: {anyon.topo_charge}" for anyon in invalid_anyons]
-            message = "The following anyons have charges that aren't defined in the given model:\n" + "\n".join(names_and_charges)
+            names_and_charges = [f'Name: {anyon.name}, Charge: {anyon.topo_charge}' for anyon in invalid_anyons]
+            message = "The following anyons have charges that aren't defined in the given model:\n" + '\n'.join(
+                names_and_charges
+            )
             raise ValueError(message)
 
         self.anyons = anyons
@@ -118,13 +119,13 @@ class Braid:
         if not self.operations:
             print('No operations to print')
             return ''
-        
+
         # Initialize the output for each anyon
         num_anyons = len(self.anyons)
         max_rows = len(self.operations) * 5  # Each swap occupies 5 rows
         output = [[' ' for _ in range(num_anyons * 5)] for _ in range(max_rows)]
 
-        spacing = 4 # 3 spaces between cols
+        spacing = 4  # 3 spaces between cols
 
         # Add '|' for non-swap columns
         for col in range(num_anyons):
@@ -140,19 +141,20 @@ class Braid:
                 for i in range(3):
                     output[base + i][index_A * spacing + 4 + i * 1] = '\\'
                     output[base + i][index_B * spacing + 4 - i * 1] = '/'
-                for i in range(3, 5):  
+                for i in range(3, 5):
                     output[base + i][index_A * spacing + 4 + (5 - i - 1) * 1] = '/'
                     output[base + i][index_B * spacing + 4 - (5 - i - 1) * 1] = '\\'
-                    
+
             else:
                 for i in range(3):
                     output[base + i][index_B * spacing + 4 + i * 1] = '\\'
                     output[base + i][index_A * spacing + 4 - i * 1] = '/'
-                for i in range(3, 5):  
+                for i in range(3, 5):
                     output[base + i][index_B * spacing + 4 + (5 - i - 1) * 1] = '/'
                     output[base + i][index_A * spacing + 4 - (5 - i - 1) * 1] = '\\'
 
         return '\n'.join([''.join(row) for row in output if any(c != ' ' for c in row)])
+
 
 # Function to test __str__ after each timestep
 def print_anyons_state(braid, swap_number):
@@ -170,7 +172,7 @@ def print_anyons_state(braid, swap_number):
         initial_anyons = [anyon.name for anyon in braid.anyons]
 
     print(f"Before swap {swap_number}: [{', '.join(initial_anyons)}]")
-    
+
     # Perform the swap operation
     if swap_number <= len(braid.operations):
         index_A, index_B = braid.operations[swap_number - 1]
@@ -179,5 +181,4 @@ def print_anyons_state(braid, swap_number):
         print(braid)
         print(f"After swap {swap_number}: [{', '.join(anyon_names)}]")
     else:
-        print("Invalid swap number")
-
+        print('Invalid swap number')
