@@ -1,4 +1,4 @@
-from anyon_braiding_simulator import Model
+from Model import Model
 
 
 class Simulator:
