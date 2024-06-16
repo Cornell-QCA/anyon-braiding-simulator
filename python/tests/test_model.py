@@ -1,6 +1,11 @@
-from anyon_braiding_simulator import Model
+import pytest
+from anyon_braiding_simulator import AnyonModel, Model
+
+"""
+TODO: Write tests for the Model class
+"""
 
 
+@pytest.fixture
 def setup():
-    model = Model()
-    return model
+    return Model(AnyonModel.Ising)

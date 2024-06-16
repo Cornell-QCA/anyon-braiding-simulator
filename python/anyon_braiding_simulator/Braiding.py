@@ -1,5 +1,6 @@
 import numpy as np
 from anyon_braiding_simulator import Anyon
+from Model import Model
 
 
 def apply_unitary(state, unitary):
@@ -46,7 +47,7 @@ def track_state_history(model, initial_state, operations):
 
 
 class Braid:
-    def __init__(self, anyons: list[Anyon]):
+    def __init__(self, anyons: list[Anyon], model: Model):
         """
         Parameters:
         anyons (list): List of Anyon objects
@@ -60,6 +61,16 @@ class Braid:
         names = [anyon.name for anyon in anyons]
         if len(names) != len(set(names)):
             raise ValueError('Duplicate anyon names detected')
+
+        # Check if all charges of given anyons are included in given model
+        charges = model.get_charges()
+        invalid_anyons = [anyon for anyon in anyons if anyon.topo_charge not in charges]
+        if invalid_anyons:
+            names_and_charges = [f'Name: {anyon.name}, Charge: {anyon.topo_charge}' for anyon in invalid_anyons]
+            message = "The following anyons have charges that aren't defined in the given model:\n" + '\n'.join(
+                names_and_charges
+            )
+            raise ValueError(message)
 
         self.anyons = anyons
         self.operations = []
