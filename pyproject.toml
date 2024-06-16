@@ -12,6 +12,17 @@ classifiers = [
 ]
 dynamic = ["version"]
 
+[tool.pytest.ini_options]
+markers = [
+    "main",
+    "fusion",
+    "braiding",
+    "state",
+    "model",
+    "anyon",
+    "basis"
+]
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
 

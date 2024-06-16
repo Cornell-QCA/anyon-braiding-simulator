@@ -164,7 +164,8 @@ class SimulatorShell(cmd.Cmd):
                 sys.exit(0)
             else:
                 print('\nError: Invalid model.')
-        model(user_input)
+        input_to_model_type = {'ising': AnyonModel.Ising, 'fibonacci': AnyonModel.Fibonacci}
+        model(input_to_model_type[user_input.lower()])
 
         # Prompt the user to input the anyon details
         no_anyons = True

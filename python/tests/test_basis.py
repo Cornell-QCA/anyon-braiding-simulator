@@ -1,12 +1,14 @@
+import pytest
 from anyon_braiding_simulator import Basis, FusionPair
 
 
-def setup():
-    pass
+@pytest.fixture
+def anyons():
+    return 10
 
 
-# Test basic input sanitizations
-def test_basis():
+@pytest.mark.basis
+def test_basis(anyons):
     anyons = 10
     operations = []
     for t in range(1, 10):
@@ -14,16 +16,25 @@ def test_basis():
 
     assert Basis(operations).verify_basis(anyons)
 
+
+@pytest.mark.basis
+def test_empty_basis(anyons):
     operations = []
 
     assert not Basis(operations).verify_basis(anyons)
 
+
+@pytest.mark.basis
+def test_swapped_basis(anyons):
     operations = []
     for t in range(1, 10):
         operations.append((t, FusionPair(t, 0)))
 
     assert not Basis(operations).verify_basis(anyons)
 
+
+@pytest.mark.basis
+def test_invalid_time_basis(anyons):
     operations = []
 
     for t in range(1, 10):

@@ -1,13 +1,14 @@
+import pytest
 from anyon_braiding_simulator import Anyon, FusionPair, IsingTopoCharge, State
 
 
-def setup() -> State:
-    state = State()
-    return state
+@pytest.fixture
+def state() -> State:
+    return State()
 
 
-def test_add_anyon():
-    state = setup()
+@pytest.mark.state
+def test_add_anyon(state):
     for i in range(100):
         anyon = Anyon(f'{i}', IsingTopoCharge.Sigma, (0, 0))
         state.add_anyon(anyon)
@@ -20,8 +21,7 @@ def test_add_anyon():
     assert len(state.anyons) == 100
 
 
-def test_add_operation():
-    state = setup()
+def test_add_operation(state):
     for i in range(101):
         anyon = Anyon(f'{i}', IsingTopoCharge.Sigma, (0, 0))
         state.add_anyon(anyon)
