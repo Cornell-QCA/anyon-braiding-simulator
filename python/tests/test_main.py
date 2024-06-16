@@ -23,3 +23,9 @@ def exec(cmds: list[str]):
 def test_join():
     cmds = ['ising', 'exit']
     exec(cmds)
+
+
+@pytest.mark.main
+def test_fusion():
+    cmds = ['ising', 'anyon psi 0 0', 'anyon sigma 1 0', 'fusion 0 1', 'exit']
+    exec(cmds)

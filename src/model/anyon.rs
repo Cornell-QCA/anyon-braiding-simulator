@@ -1,5 +1,3 @@
-use std::slice::SliceIndex;
-
 use pyo3::prelude::*;
 
 /// Lazy solution for now, will properly implement a more general Topo Charge w/ specified
@@ -18,6 +16,14 @@ impl IsingTopoCharge {
             IsingTopoCharge::Psi => 0,
             IsingTopoCharge::Vacuum => 1,
             IsingTopoCharge::Sigma => 2,
+        }
+    }
+
+    pub fn to_string(&self) -> &str {
+        match self {
+            IsingTopoCharge::Psi => "Psi",
+            IsingTopoCharge::Vacuum => "Vacuum",
+            IsingTopoCharge::Sigma => "Sigma",
         }
     }
 }
@@ -53,7 +59,6 @@ impl AccessAnyon for Anyon {
     }
 }
 
-
 #[pymethods]
 impl Anyon {
     #[new]
@@ -63,5 +68,14 @@ impl Anyon {
             charge,
             position,
         }
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(format!(
+            "Anyon: name={}, charge={}, position={:?}",
+            self.name,
+            self.charge.to_string(),
+            self.position
+        ))
     }
 }

@@ -71,7 +71,7 @@ def anyon(*args):
     try:
         sim.update_anyons(True, [new_anyon])
         if len(args) == 2:
-            print(f'Created anyon {name} with TC {topological_charge} at position {position_1D} in 1D')
+            print(f'Created anyon {name} with TC {topological_charge} at position {position[0]} in 1D')
         else:
             print(f'Created anyon {name} with TC {topological_charge} at position {position} in 2D')
     except ValueError:
@@ -130,7 +130,7 @@ def braid(*args):
         print('Error: Not enough arguments')
         return
 
-    braid = Braid(sim.list_anyons(), sim._model)
+    braid = Braid(sim.list_anyons())
     cmd = args[0]
 
     if cmd.lower() == 'swap':
@@ -254,7 +254,7 @@ class SimulatorShell(cmd.Cmd):
         if args[0] == 'help' or args[0] == '-h':
             print(self.command_options['list'])
         else:
-            print(sim.list_anyons())
+            print(f'Anyons: {"\n\t".join([str(anyon) for anyon in sim.list_anyons()])}')
 
     def do_exit(self, arg):
         "Exit the simulator"
@@ -262,7 +262,8 @@ class SimulatorShell(cmd.Cmd):
 
     def do_help(self, arg):
         "Print help"
-        print('Commands: fusion, braid, exit, help')
+        cmds = ['anyon', 'model', 'fusion', 'braid', 'exit', 'list']
+        print(f'Commands: {", ".join(sorted(cmds))}')
 
 
 if __name__ == '__main__':
