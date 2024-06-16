@@ -26,8 +26,8 @@ jobs:
         cache: 'pip'
     - name: Create & Activate virtualenv
       run: |
-        python -m venv venv
-        . venv/bin/activate
+        python -m venv .venv
+        . .venv/bin/activate
         echo PATH=$PATH >> $GITHUB_ENV
     - name: Install dependencies
       run: |
