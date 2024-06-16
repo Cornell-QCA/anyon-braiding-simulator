@@ -1,15 +1,9 @@
 # Standard Library
 import cmath
-from enum import Enum
 from itertools import product
 
 import numpy as np
-
-
-class AnyonModel(Enum):
-    Ising = 1
-    Fibonacci = 2
-    Custom = 3
+from anyon_braiding_simulator import AnyonModel
 
 
 class Model:

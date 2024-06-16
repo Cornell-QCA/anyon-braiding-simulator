@@ -21,16 +21,17 @@ def anyon(*args):
 
     name = args[0]
     topological_charge = args[1]
+    position = ()
 
+    topo_charge = {
+        'psi': IsingTopoCharge.Psi,
+        'sigma': IsingTopoCharge.Sigma,
+        'vac': IsingTopoCharge.Vacuum,
+    }
     try:
-        topo_charge = {
-            'psi': IsingTopoCharge.Psi,
-            'sigma': IsingTopoCharge.Sigma,
-            'vac': IsingTopoCharge.Vacuum,
-        }
         topological_charge = topo_charge[args[1].lower()]
-    except ValueError:
-        print('Error: topological charge must be a number')
+    except KeyError:
+        print(f'Error: topological charge must be in {list(topo_charge.keys())}')
         return
 
     if len(args) == 2:
@@ -47,7 +48,6 @@ def anyon(*args):
 
         position_1D = len(anyons)  # Index/position of new anyon in 1D
         position = (position_1D, 0)
-        print(f'Created anyon {name} with TC {topological_charge} at position {position_1D} in 1D')
     else:
         # Make sure any previous anyons were specified in 2D space
         if sim.get_dim_of_anyon_pos() == 1:
@@ -67,10 +67,15 @@ def anyon(*args):
             print('Error: position must be formatted as {x,y} where x and y are numbers')
             return
 
-        print(f'Created anyon {name} with TC {topological_charge} at position {position} in 2D')
-
     new_anyon = Anyon(name, topological_charge, position)
-    sim.update_anyons(True, [new_anyon])
+    try:
+        sim.update_anyons(True, [new_anyon])
+        if len(args) == 2:
+            print(f'Created anyon {name} with TC {topological_charge} at position {position_1D} in 1D')
+        else:
+            print(f'Created anyon {name} with TC {topological_charge} at position {position} in 2D')
+    except ValueError:
+        print('Error: An anyon with the same name already exists')
 
 
 def model(*args):
@@ -89,7 +94,6 @@ def model(*args):
 
     model_convert = {'ising': AnyonModel.Ising, 'fibonacci': AnyonModel.Fibonacci}
 
-    # TODO: figure out why this throws an error
     model = Model(model_convert[model_type.lower()])
     sim.set_model(model)
 
@@ -164,8 +168,8 @@ class SimulatorShell(cmd.Cmd):
                 sys.exit(0)
             else:
                 print('\nError: Invalid model.')
-        input_to_model_type = {'ising': AnyonModel.Ising, 'fibonacci': AnyonModel.Fibonacci}
-        model(input_to_model_type[user_input.lower()])
+
+        model(user_input)
 
         # Prompt the user to input the anyon details
         no_anyons = True

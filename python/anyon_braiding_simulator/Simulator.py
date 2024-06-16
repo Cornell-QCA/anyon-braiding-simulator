@@ -19,7 +19,13 @@ class Simulator:
         anyons are being removed.
         anyons: list - List of anyons to add or remove.
         """
+
         if is_increasing:
+            # Check if any anyons are being added that are already in the simulator
+            for anyon in anyons:
+                for anyon_in_sim in self._anyons:
+                    if anyon_in_sim.name == anyon.name:
+                        raise ValueError('Anyon name is already in simulator')
             self._anyons.extend(anyons)
         else:
             self._anyons = [anyon for anyon in self._anyons if anyon not in anyons]
