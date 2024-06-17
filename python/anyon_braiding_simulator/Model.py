@@ -1,15 +1,9 @@
 # Standard Library
 import cmath
-from enum import Enum
 from itertools import product
 
 import numpy as np
-
-
-class AnyonModel(Enum):
-    Ising = 1
-    Fibonacci = 2
-    Custom = 3
+from anyon_braiding_simulator import AnyonModel
 
 
 class Model:
@@ -37,6 +31,7 @@ class Model:
         self.model_type = model_type
 
         if model_type == AnyonModel.Ising:
+            self._charges = {'vacuum', 'sigma', 'psi'}
             self._r_mtx = cmath.exp(-1j * np.pi / 8) * np.array([[1, 0], [0, 1j]])
 
             self._f_mtx = np.zeros((3, 3, 3, 3, 2, 2))
@@ -52,6 +47,7 @@ class Model:
             self._rules = []
 
         elif model_type == AnyonModel.Fibonacci:
+            self._charges = {'vacuum', 'psi'}
             self._r_mtx = np.array([[cmath.exp(4 * np.pi * 1j / 5), 0], [0, -1 * cmath.exp(2 * np.pi * 1j / 5)]])
             self._f_mtx = []
             self._rules = []
@@ -118,4 +114,4 @@ class Model:
             if i not in anyondict:
                 raise ValueError('invalid anyon name')
 
-        return self._f_mtx[anyondict[a], anyondict[b], anyondict[c], anyondict[d]]
+        return self._f_mtx[anyondict[a]][anyondict[b]][anyondict[c]][anyondict[d]]
