@@ -1,4 +1,3 @@
--e git+ssh://git@github.com/Cornell-QCA/anyon-braiding-simulator.git@810e72285130ec4144d0dc87efa59c46fa0335eb#egg=anyon_braiding_simulator
 appnope==0.1.4
 asttokens==2.4.1
 attrs==23.2.0
