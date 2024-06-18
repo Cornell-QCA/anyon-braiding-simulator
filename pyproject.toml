@@ -1,0 +1,50 @@
+[build-system]
+requires = ["maturin>=1.6,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "anyon-braiding-simulator"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+dynamic = ["version"]
+
+[tool.pytest.ini_options]
+markers = [
+    "main",
+    "fusion",
+    "braiding",
+    "state",
+    "model",
+    "anyon",
+    "basis"
+]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+
+[tool.ruff]
+lint.select = ["E", "F"]
+lint.ignore = ["F405", "F403"]
+exclude = [
+    "build",
+    "dist",
+    "venv",
+    ".venv"
+]
+line-length = 120
+
+[tool.ruff.lint.per-file-ignores]
+"tools/ignore.py" = ["F401"]
+"python/anyon_braiding_simulator/__init__.py" = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+docstring-code-format = true
+
+[tool.pyright]
+include = ["python", "target/wheels", "venv/lib/python3.12/site-packages/"]
