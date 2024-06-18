@@ -124,6 +124,26 @@ class TestInvalidCommands:
         exec(cmds)
 
     @pytest.mark.main
+    def test_anyon_invalid_charge(self):
+        cmds = ['ising', 'anyon1 derp', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_invalid_command_post_init(self):
+        cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'derp', 'exit']
+        exec(cmds)
+    
+    @pytest.mark.main
+    def test_invalid_braid_syntax(self):
+        cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'braid swap derp derp', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_invalid_fusion_syntax(self):
+        cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'fusion derp derp', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
     def test_model_post_init(self):
         cmds = ['ising', 'anyon1 psi', 'done', 'model fibonacci', 'exit']
         exec(cmds)
