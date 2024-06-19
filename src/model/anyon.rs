@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 
 #[pyclass]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+/// Options for the topological charge for an Ising Model anyon
 pub enum IsingTopoCharge {
     Psi,
     Vacuum,
@@ -10,6 +11,7 @@ pub enum IsingTopoCharge {
 
 #[pyclass]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+/// Options for the topological charge for an Fibonacci Model anyon
 pub enum FibonacciTopoCharge {
     Tau,
     Vacuum,
@@ -17,6 +19,8 @@ pub enum FibonacciTopoCharge {
 
 #[pyclass]
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
+/// Options for the topological charge for an anyon
+/// Currently only supports Ising and Fibonacci models
 pub struct TopoCharge {
     ising: Option<IsingTopoCharge>,
     fibonacci: Option<FibonacciTopoCharge>,
@@ -92,15 +96,6 @@ impl TopoCharge {
 impl IsingTopoCharge {
     pub fn value(&self) -> usize {
         *self as usize
-        // match self {
-        //     IsingTopoCharge::Psi => 0,
-        //     IsingTopoCharge::Vacuum => 1,
-        //     IsingTopoCharge::Sigma => 2,
-        // }
-<<<<<<< ours
-<<<<<<< Updated upstream
-<<<<<<< ours
-<<<<<<< ours
     }
 
     pub fn to_string(&self) -> &str {
@@ -109,24 +104,20 @@ impl IsingTopoCharge {
             IsingTopoCharge::Vacuum => "Vacuum",
             IsingTopoCharge::Sigma => "Sigma",
         }
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> theirs
     }
 }
 
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
+/// In Topological Quantum Computing, anyons are the fundamental quasiparticles
+/// which enable the computation. Anyons have an associated topological charge
+/// given by the model used. This struct represents an anyon with a name,
+/// charge, and position.
 pub struct Anyon {
     #[pyo3(get)]
     name: String,
     #[pyo3(get)]
-    charge: IsingTopoCharge,
+    charge: TopoCharge,
     #[pyo3(get)]
     position: (f64, f64),
 }
@@ -136,7 +127,7 @@ impl Anyon {
         &self.name
     }
 
-    pub fn charge(&self) -> IsingTopoCharge {
+    pub fn charge(&self) -> TopoCharge {
         self.charge.clone()
     }
 
@@ -148,7 +139,7 @@ impl Anyon {
 #[pymethods]
 impl Anyon {
     #[new]
-    pub fn new(name: String, charge: IsingTopoCharge, position: (f64, f64)) -> Self {
+    pub fn new(name: String, charge: TopoCharge, position: (f64, f64)) -> Self {
         Anyon {
             name,
             charge,
