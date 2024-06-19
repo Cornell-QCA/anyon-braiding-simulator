@@ -10,6 +10,7 @@ mod util;
 fn anyon_braiding_simulator(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<model::anyon::Anyon>()?;
     m.add_class::<model::anyon::IsingTopoCharge>()?;
+    m.add_class::<model::anyon::TopoCharge>()?;
 
     m.add_class::<model::model::Model>()?;
     m.add_class::<model::model::AnyonModel>()?;
