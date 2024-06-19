@@ -1,4 +1,4 @@
-use crate::{fusion::fusion::AccessFusionPair, fusion::fusion::FusionPair, model::anyon::Anyon};
+use crate::{fusion::fusion::FusionPair, model::anyon::Anyon};
 use pyo3::prelude::*;
 
 /// The state of the system

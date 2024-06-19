@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use super::anyon::{AccessAnyon, Anyon, IsingTopoCharge};
+// use super::anyon::{Anyon, IsingTopoCharge};
 
 /// Different Anyon models that can be used to simulate the system
 #[pyclass]
@@ -19,21 +19,24 @@ impl AnyonModel {
     }
 }
 
-/// The parameters accompanying a model
-#[pyclass]
-pub struct Model {
-    model_type: AnyonModel,
-    // more fields which we'll impl later
-}
+// Commenting out Model for now because it has no use atm We might port the
+// python stuff to rust later, but for now we have no use
 
-#[pymethods]
-impl Model {
-    #[new]
-    fn new() -> Self {
-        // Model { model_type }
-        Model {
-            model_type: AnyonModel::Ising,
-        }
-    }
+// /// The parameters accompanying a model
+// #[pyclass]
+// pub struct Model {
+//     model_type: AnyonModel,
+//     // more fields which we'll impl later
+// }
 
-}
+// #[pymethods]
+// impl Model {
+//     #[new]
+//     fn new() -> Self {
+//         // Model { model_type }
+//         Model {
+//             model_type: AnyonModel::Ising,
+//         }
+//     }
+
+// }
