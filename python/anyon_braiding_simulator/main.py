@@ -3,7 +3,7 @@ import cmd
 import subprocess
 import sys
 
-from anyon_braiding_simulator import Anyon, AnyonModel, IsingTopoCharge
+from anyon_braiding_simulator import Anyon, AnyonModel, FibonacciTopoCharge, IsingTopoCharge
 from Braiding import Braid
 from Model import Model
 from Simulator import Simulator
@@ -23,11 +23,19 @@ def anyon(*args):
     topological_charge = args[1]
     position = ()
 
-    topo_charge = {
-        'psi': IsingTopoCharge.Psi,
-        'sigma': IsingTopoCharge.Sigma,
-        'vac': IsingTopoCharge.Vacuum,
-    }
+    topo_charge = {}
+    if sim.get_model() == AnyonModel.Ising:
+        topo_charge = {
+            'psi': IsingTopoCharge.Psi,
+            'sigma': IsingTopoCharge.Sigma,
+            'vac': IsingTopoCharge.Vacuum,
+        }
+    elif sim.get_model() == AnyonModel.Fibonacci:
+        topo_charge = {
+            'tau': FibonacciTopoCharge.Tau,
+            'vac': FibonacciTopoCharge.Vacuum,
+        }
+
     try:
         topological_charge = topo_charge[args[1].lower()]
     except KeyError:

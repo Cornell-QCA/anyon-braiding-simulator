@@ -1,4 +1,5 @@
 use crate::{fusion::fusion::FusionPair, model::anyon::Anyon};
+use crate::util::statevec::StateVec;
 use pyo3::prelude::*;
 
 /// The state of the system
@@ -12,6 +13,8 @@ pub struct State {
     anyons: Vec<Anyon>,
     #[pyo3(get)]
     operations: Vec<(u32, FusionPair)>,
+    // #[pyo3(get)]
+    // state_vec: StateVec,
 }
 
 /// Internal Methods
