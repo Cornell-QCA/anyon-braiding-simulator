@@ -53,3 +53,20 @@ def test_qubit_enc(state):
     correct = [FusionPair(0, 1), FusionPair(2, 4), FusionPair(2, 3)]
 
     assert set(map(str, fusion.qubit_enc(AnyonModel.Ising))) == set(map(str, correct))
+
+
+@pytest.mark.fusion
+def test_verify_fusion_result(state):
+    for i in range(3):
+        state.add_anyon(Anyon(f'{i}', TopoCharge.from_ising(IsingTopoCharge.Sigma), (0, 0)))
+
+    fusion = Fusion(state)
+    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Sigma), AnyonModel.Ising)
+    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Vacuum), AnyonModel.Ising)
+    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Psi), AnyonModel.Ising)
+
+    state.add_anyon(Anyon('3', TopoCharge.from_ising(IsingTopoCharge.Sigma), (0, 0)))
+    fusion = Fusion(state)
+    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Vacuum), AnyonModel.Ising)
+    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Psi), AnyonModel.Ising)
+    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Sigma), AnyonModel.Ising)
