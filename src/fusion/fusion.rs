@@ -147,18 +147,23 @@ impl Fusion {
 
     /// Checks if an overall fusion result is possible given the state's
     /// configuration and an initial topo charge
+    ///
+    /// Precondition: Non empty list of anyons
     pub fn ising_verify_fusion_result(&self, init_charge: IsingTopoCharge) -> bool {
-        self.state
+        let overall_fusion_result: [u64; 3] = self
+            .state
             .anyons()
-            .iter_mut()
+            .iter()
             .map(|a| self.ising_canonical_topo_charge(a.charge().get_ising()))
             .reduce(|acc, tc| self.ising_apply_fusion(acc, tc))
-            .unwrap()
-            .iter()
-            .zip(self.ising_canonical_topo_charge(init_charge).iter())
-            .all(|(a, b)| if *b > 0 { *a > 0 } else { true })
+            .unwrap();
+
         // if an element > 0 that means it was our initial charge, so we need to
         // check if our final fusion result also has that element > 0
+        overall_fusion_result
+            .iter()
+            .zip(self.ising_canonical_topo_charge(init_charge).iter())
+            .all(|(a, b)| *b <= 0 || *a > 0)
     }
 }
 
