@@ -36,6 +36,14 @@ class Simulator:
         """
         self._model = model
 
+    def get_model(self) -> Model:
+        """
+        Get the model for the simulator.
+        """
+        if self._model is None:
+            raise ValueError('Model has not been set')
+        return self._model
+
     def list_anyons(self) -> list:
         """
         List the anyons currently in the simulator.
