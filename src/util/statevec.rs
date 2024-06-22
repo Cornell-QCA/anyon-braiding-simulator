@@ -58,7 +58,6 @@ impl StateVec {
     #[setter]
     fn set_vec(&mut self, vec: PyReadonlyArray1<Complex64>) {
         self.vec = vec.as_array().to_owned();
-        self.normalize();
     }
 
     #[setter]
