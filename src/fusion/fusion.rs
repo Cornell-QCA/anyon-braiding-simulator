@@ -165,6 +165,49 @@ impl Fusion {
             .zip(self.ising_canonical_topo_charge(init_charge).iter())
             .all(|(a, b)| *b <= 0 || *a > 0)
     }
+
+    ///
+    /// Returns number of sigmas that can be in the initial topological charges of anyons to exactly a certain number of qubits for the Ising model
+    /// 
+    pub fn ising_possible_sigmas(&self, qubits:u32) -> Vec<u32>{
+        vec![2*qubits+1, 2*qubits+2]
+    }
+    ///
+    /// Returns number of taus that can be in the initial topological charges of anyons to exactly a certain number of qubits for the Fibonacci model
+    /// 
+    /// Precondition: Requires qubits <=30
+    pub fn fibonacci_possible_taus(&self, qubits:u32) -> Vec<u32> {
+
+        if qubits ==0{
+            return vec![0,1,2,3];
+        }
+
+        let mut possible_taus = Vec::new();
+
+        let mut n = 1;
+
+
+        // We have that the fibonacci recurrence gives us that tau^n = a + b * tau
+        let mut a = 0;
+        let mut b = 1;
+        
+        // Checks that b < 2^(qubits+1) meaning as otherwise fusing to tau would result in too many qubits
+        while b < 1 << (qubits+1) {
+            
+            // If b >= 2^qubits we have that this will give exactly 'qubits' qubits
+            if (1 << (qubits)) <= b{
+                possible_taus.push(n);
+            }
+
+            b=a+b;
+            a=b-a;
+
+            n+=1;
+        }
+        // Accounts for the case that we can also fuse to vaccuum
+        possible_taus.push(n);
+        possible_taus
+    }
 }
 
 /// Python Facing Methods
