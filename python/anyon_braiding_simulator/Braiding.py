@@ -1,12 +1,12 @@
 import numpy as np
-from anyon_braiding_simulator import State, Fusion, AnyonModel, Model
+from anyon_braiding_simulator import State, Fusion, Model, AnyonModel
 
 class Braid:
     def __init__(self, state: State, model: Model):
         """
         Parameters:
         - state (State): The state of the system containing anyons and fusion operations
-        - model_type (AnyonModel): Model to use for the braid simulation
+        - model (Model): Model to use for the braid simulation
         """
         self.state = state
         self.anyons = state.anyons
@@ -74,7 +74,7 @@ class Braid:
         index_A, index_B = swap[swap_index]
 
         # Iterate through the qubit encoding to find the matching qubit
-        for qubit_index, fusion_pair in enumerate(self.fusion.qubit_enc()):
+        for qubit_index, fusion_pair in enumerate(self.fusion.qubit_enc(self.model.model_type)):
             if {index_A, index_B} == {fusion_pair.anyon_1, fusion_pair.anyon_2}:
                 return qubit_index
 
@@ -112,11 +112,11 @@ class Braid:
         return swap_matrix
 
     def generate_overall_unitary(self, time: int, swap_index: int) -> np.ndarray:
-        qubit_encoding = self.fusion.qubit_enc()
+        qubit_encoding = self.fusion.qubit_enc(self.model.model_type)
         if qubit_encoding is None:
             raise ValueError("Fusion qubit encoding returned None")
 
-        num_qubits = len(self.fusion.qubit_enc())
+        num_qubits = len(self.fusion.qubit_enc(self.model.model_type))
         unitary = np.eye(2**num_qubits)  # Start with identity matrix of appropriate size
 
         for i in range(num_qubits):

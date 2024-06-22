@@ -149,17 +149,17 @@ def setup_state():
     state.add_operation(3, FusionPair(0, 2))
 
     # Initialize the braid with the given state and model type
-    braid = Braid(state, AnyonModel.Ising)
+    braid = Braid(state, Model(AnyonModel.Ising))
     
     return braid
 
 def test_qubit_enc(setup_state):
     braid = setup_state
 
-    correct = [FusionPair(0, 1), FusionPair(2, 3), FusionPair(2, 4)]
+    correct = [FusionPair(0, 1), FusionPair(2, 4), FusionPair(2, 3)]
 
     # Confirm qubit_enc is working as expected
-    assert set(map(str, braid.fusion.qubit_enc())) == set(map(str, correct))
+    assert set(map(str, braid.fusion.qubit_enc(braid.model.model_type))) == set(map(str, correct))
 
 def test_swap_to_qubit(setup_state):
     braid = setup_state
