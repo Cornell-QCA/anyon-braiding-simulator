@@ -3,7 +3,13 @@ import cmd
 import subprocess
 import sys
 
-from anyon_braiding_simulator import Anyon, AnyonModel, IsingTopoCharge
+from anyon_braiding_simulator.anyon_braiding_simulator import (
+    Anyon,
+    AnyonModel,
+    FibonacciTopoCharge,
+    IsingTopoCharge,
+    TopoCharge,
+)
 from Braiding import Braid
 from Model import Model
 from Simulator import Simulator
@@ -23,11 +29,22 @@ def anyon(*args):
     topological_charge = args[1]
     position = ()
 
-    topo_charge = {
-        'psi': IsingTopoCharge.Psi,
-        'sigma': IsingTopoCharge.Sigma,
-        'vac': IsingTopoCharge.Vacuum,
-    }
+    topo_charge = {}
+    if sim.get_model().get_model_type() == AnyonModel.Ising:
+        topo_charge = {
+            'psi': IsingTopoCharge.Psi,
+            'sigma': IsingTopoCharge.Sigma,
+            'vac': IsingTopoCharge.Vacuum,
+        }
+    elif sim.get_model().get_model_type() == AnyonModel.Fibonacci:
+        topo_charge = {
+            'tau': FibonacciTopoCharge.Tau,
+            'Vacuum': FibonacciTopoCharge.Vacuum,
+        }
+    else:
+        print('Error: Model not set')
+        return
+
     try:
         topological_charge = topo_charge[args[1].lower()]
     except KeyError:
@@ -67,7 +84,7 @@ def anyon(*args):
             print('Error: position must be formatted as {x,y} where x and y are numbers')
             return
 
-    new_anyon = Anyon(name, topological_charge, position)
+    new_anyon = Anyon(name, TopoCharge(topological_charge), position)
     try:
         sim.update_anyons(True, [new_anyon])
         if len(args) == 2:

@@ -3,7 +3,7 @@ import cmath
 
 import numpy as np
 import pytest
-from anyon_braiding_simulator import AnyonModel
+from anyon_braiding_simulator.anyon_braiding_simulator import AnyonModel
 from Model import Model
 
 

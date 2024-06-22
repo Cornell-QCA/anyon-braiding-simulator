@@ -1,5 +1,5 @@
 import pytest
-from anyon_braiding_simulator import Basis, FusionPair
+from anyon_braiding_simulator.anyon_braiding_simulator import Basis, FusionPair
 
 
 @pytest.fixture
