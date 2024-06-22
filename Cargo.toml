@@ -9,4 +9,9 @@ name = "anyon_braiding_simulator"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = "0.21.1"
+pyo3 = { version = "0.21", features = ["extension-module"] }
+numpy = "0.21"
+ndarray = "0.13"
+
+[dev-dependencies]
+maturin = "0.12"

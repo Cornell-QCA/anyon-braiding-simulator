@@ -22,5 +22,6 @@ fn anyon_braiding_simulator(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<fusion::state::State>()?;
 
     m.add_class::<util::basis::Basis>()?;
+    m.add_class::<util::statevec::StateVec>()?;
     Ok(())
 }

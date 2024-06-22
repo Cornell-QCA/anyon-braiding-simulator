@@ -3,7 +3,13 @@ import cmd
 import subprocess
 import sys
 
-from anyon_braiding_simulator import Anyon, AnyonModel, FibonacciTopoCharge, IsingTopoCharge, TopoCharge
+from anyon_braiding_simulator.anyon_braiding_simulator import (
+    Anyon,
+    AnyonModel,
+    FibonacciTopoCharge,
+    IsingTopoCharge,
+    TopoCharge,
+)
 from Braiding import Braid
 from Model import Model
 from Simulator import Simulator
