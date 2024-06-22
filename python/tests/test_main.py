@@ -3,7 +3,7 @@ import os
 
 import pytest
 import sh
-
+import fcntl
 
 def exec(cmds: list[str]):
     os.chdir('python/anyon_braiding_simulator')
