@@ -311,4 +311,12 @@ impl Fusion {
             _ => false,
         }
     }
+    fn minimum_possible_anyons(&self, qubits: u32, anyon_model: &AnyonModel) -> PyResult<Vec<u32>>{
+        match anyon_model{
+            AnyonModel::Ising => Ok(self.ising_possible_sigmas(qubits)),
+            AnyonModel::Fibonacci => Ok(self.fibonacci_possible_taus(qubits)),
+            _ => Err(PyValueError::new_err("This model is not supported yet"))
+        }
+
+    }
 }
