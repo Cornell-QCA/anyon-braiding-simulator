@@ -75,7 +75,6 @@ impl Fusion {
     }
 
     /// Assumes model is Ising
-    /// TODO: THIS IS NON DETERMINISTIC WTF
     fn qubit_enc(&self) -> PyResult<Vec<FusionPair>> {
         let enum_to_canonical = |charge: IsingTopoCharge| -> [u64; 3] {
             match charge {
