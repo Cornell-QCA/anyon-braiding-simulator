@@ -26,18 +26,22 @@ impl StateVec {
     }
 }
 
-
 /// Python Methods
 #[pymethods]
 impl StateVec {
     #[new]
     /// Creates a new state vector. If no vector is provided, it will be
-    /// initialized to 0. Additionally, the vector will be normalized.
+    /// initialized to |0> for all qubits. Additionally, the vector will be
+    /// normalized.
     pub fn new(qubit_num: usize, vec: Option<PyReadonlyArray1<Complex64>>) -> Self {
-        let init_size = 2 << qubit_num;
+        let init_size = 2 << (qubit_num - 1);
         let vec = match vec {
             Some(vec) => vec.as_array().to_owned(),
-            None => Array1::zeros(init_size),
+            None => {
+                let mut vec = vec![Complex64::new(1.0, 0.0)];
+                vec.extend(vec![Complex64::new(0.0, 0.0); init_size - 1]);
+                Array1::from(vec)
+            }
         };
 
         // normalize the vector
@@ -49,6 +53,12 @@ impl StateVec {
     #[getter]
     fn vec(&self, py: Python<'_>) -> PyResult<Py<PyArray1<Complex64>>> {
         Ok(self.vec.to_pyarray_bound(py).to_owned().into())
+    }
+
+    #[setter]
+    fn set_vec(&mut self, vec: PyReadonlyArray1<Complex64>) {
+        self.vec = vec.as_array().to_owned();
+        self.normalize();
     }
 
     #[setter]
