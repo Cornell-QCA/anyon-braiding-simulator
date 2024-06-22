@@ -3,12 +3,11 @@ import os
 import sys
 import numpy as np
 
-# Ensure correct path to import modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'anyon_braiding_simulator')))
 
 from Braiding import Braid
 from Model import Model
-from anyon_braiding_simulator import Anyon, AnyonModel, IsingTopoCharge, State, FusionPair
+from anyon_braiding_simulator import Anyon, AnyonModel, IsingTopoCharge, TopoCharge, State, FusionPair
 
 
 @pytest.fixture
@@ -16,10 +15,10 @@ def setup_state_and_anyons():
     model = Model(AnyonModel.Ising)
     state = State()
     anyons = [
-        Anyon('A', IsingTopoCharge.Psi, (1, 1)),
-        Anyon('B', IsingTopoCharge.Psi, (2, 2)),
-        Anyon('C', IsingTopoCharge.Psi, (3, 3)),
-        Anyon('D', IsingTopoCharge.Psi, (4, 4))
+        Anyon('A', TopoCharge.from_ising(IsingTopoCharge.Psi), (1, 1)),
+        Anyon('B', TopoCharge.from_ising(IsingTopoCharge.Psi), (2, 2)),
+        Anyon('C', TopoCharge.from_ising(IsingTopoCharge.Psi), (3, 3)),
+        Anyon('D', TopoCharge.from_ising(IsingTopoCharge.Psi), (4, 4))
     ]
     for anyon in anyons:
         state.add_anyon(anyon)
@@ -43,7 +42,7 @@ def test_braid_initialization(setup_state_and_anyons):
     # Test with duplicate anyon names
     state_duplicate = State()
     duplicate_anyons = anyons[:]
-    duplicate_anyons[3] = Anyon('A', IsingTopoCharge.Psi, (4, 4))
+    duplicate_anyons[3] = Anyon('A', TopoCharge.from_ising(IsingTopoCharge.Psi), (4, 4))
     for anyon in duplicate_anyons:
         state_duplicate.add_anyon(anyon)
     with pytest.raises(ValueError, match='Duplicate anyon names detected'):
@@ -140,7 +139,7 @@ def setup_state():
     # Initialize the state with 6 anyons
     state = State()
     for i in range(6):
-        state.add_anyon(Anyon(f'{i}', IsingTopoCharge.Sigma, (0, 0)))
+        state.add_anyon(Anyon(f'{i}', TopoCharge.from_ising(IsingTopoCharge.Sigma), (0, 0)))
     
     # Add fusion operations
     state.add_operation(1, FusionPair(0, 1))
@@ -177,7 +176,7 @@ def test_swap_to_qubit(setup_state):
 @pytest.fixture
 def setup_braid():
     state = State()
-    anyons = [Anyon(f'{i}', IsingTopoCharge.Sigma, (0,0)) for i in range(6)]
+    anyons = [Anyon(f'{i}', TopoCharge.from_ising(IsingTopoCharge.Sigma), (0,0)) for i in range(6)]
     for anyon in anyons:
         state.add_anyon(anyon)
     model = Model(AnyonModel.Ising)
