@@ -237,8 +237,8 @@ impl Fusion {
         Ok(basis.verify_basis(self.state.anyons().len()))
     }
 
-    fn qubit_enc(&self, anyon_model: &AnyonModel) -> PyResult<Vec<FusionPair>> {
-        match anyon_model {
+    fn qubit_enc(&self) -> PyResult<Vec<FusionPair>> {
+        match self.state.anyon_model() {
             AnyonModel::Ising => Ok(self.ising_qubit_enc()),
             _ => Err(PyValueError::new_err("This model is not supported yet")),
         }
@@ -297,22 +297,21 @@ impl Fusion {
         &self,
         anyon_1: [u64; 3],
         anyon_2: [u64; 3],
-        anyon_model: &AnyonModel,
     ) -> PyResult<[u64; 3]> {
-        match anyon_model {
+        match self.state.anyon_model() {
             AnyonModel::Ising => Ok(self.ising_apply_fusion(anyon_1, anyon_2)),
             _ => Err(PyValueError::new_err("This model is not supported yet")),
         }
     }
 
-    fn verify_fusion_result(&self, init_charge: TopoCharge, anyon_model: &AnyonModel) -> bool {
-        match anyon_model {
+    fn verify_fusion_result(&self, init_charge: TopoCharge) -> bool {
+        match self.state.anyon_model() {
             AnyonModel::Ising => self.ising_verify_fusion_result(init_charge.get_ising()),
             _ => false,
         }
     }
-    fn minimum_possible_anyons(&self, qubits: u32, anyon_model: &AnyonModel) -> PyResult<Vec<u32>>{
-        match anyon_model{
+    fn minimum_possible_anyons(&self, qubits: u32) -> PyResult<Vec<u32>>{
+        match self.state.anyon_model() {
             AnyonModel::Ising => Ok(self.ising_possible_sigmas(qubits)),
             AnyonModel::Fibonacci => Ok(self.fibonacci_possible_taus(qubits)),
             _ => Err(PyValueError::new_err("This model is not supported yet"))

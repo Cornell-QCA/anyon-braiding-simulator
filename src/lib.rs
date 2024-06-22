@@ -13,7 +13,6 @@ fn anyon_braiding_simulator(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<model::anyon::FibonacciTopoCharge>()?;
     m.add_class::<model::anyon::TopoCharge>()?;
 
-    m.add_class::<model::model::Model>()?;
     m.add_class::<model::model::AnyonModel>()?;
 
     m.add_class::<fusion::fusion::Fusion>()?;

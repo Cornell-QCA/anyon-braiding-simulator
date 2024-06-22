@@ -1,4 +1,4 @@
-use crate::{fusion::fusion::FusionPair, model::anyon::Anyon};
+use crate::{fusion::fusion::FusionPair, model::anyon::Anyon, model::model::AnyonModel};
 use pyo3::prelude::*;
 
 /// The state of the system
@@ -12,6 +12,8 @@ pub struct State {
     anyons: Vec<Anyon>,
     #[pyo3(get)]
     operations: Vec<(u32, FusionPair)>,
+    #[pyo3(get)]
+    anyon_model: AnyonModel,
 }
 
 /// Internal Methods
@@ -22,6 +24,10 @@ impl State {
 
     pub fn operations(&self) -> Vec<(u32, FusionPair)> {
         self.operations.clone()
+    }
+
+    pub fn anyon_model(&self) -> AnyonModel{
+        self.anyon_model.clone()
     }
 
     /// Verify the operation
@@ -59,6 +65,7 @@ impl State {
         State {
             anyons: Vec::new(),
             operations: Vec::new(),
+            anyon_model: AnyonModel::Ising, //Assume model is Ising by default
         }
     }
 
@@ -77,5 +84,8 @@ impl State {
         self.operations.push((time, operation));
 
         Ok(true)
+    }
+    fn set_anyon_model(&mut self, model:AnyonModel){
+        self.anyon_model=model;
     }
 }

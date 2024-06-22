@@ -32,13 +32,13 @@ def test_apply_ising_fusion(state):
     vacuum = [0, 1, 0]
     sigma = [0, 0, 1]
 
-    assert fusion.apply_fusion(psi, psi, AnyonModel.Ising) == vacuum
-    assert fusion.apply_fusion(vacuum, vacuum, AnyonModel.Ising) == vacuum
-    assert fusion.apply_fusion(sigma, sigma, AnyonModel.Ising) == [psi[i] + vacuum[i] for i in range(3)]
+    assert fusion.apply_fusion(psi, psi) == vacuum
+    assert fusion.apply_fusion(vacuum, vacuum) == vacuum
+    assert fusion.apply_fusion(sigma, sigma) == [psi[i] + vacuum[i] for i in range(3)]
 
     psi_sigma = [1, 0, 1]
-    assert fusion.apply_fusion(psi_sigma, psi_sigma, AnyonModel.Ising) == [1, 2, 2]
-    assert not fusion.apply_fusion(psi_sigma, psi_sigma, AnyonModel.Ising) == [2, 1, 2]  # get owned rishi
+    assert fusion.apply_fusion(psi_sigma, psi_sigma) == [1, 2, 2]
+    assert not fusion.apply_fusion(psi_sigma, psi_sigma) == [2, 1, 2]  # get owned rishi
 
 
 @pytest.mark.fusion
@@ -52,30 +52,35 @@ def test_qubit_enc(state):
     fusion = Fusion(state)
     correct = [FusionPair(0, 1), FusionPair(2, 4), FusionPair(2, 3)]
 
-    assert set(map(str, fusion.qubit_enc(AnyonModel.Ising))) == set(map(str, correct))
+    assert set(map(str, fusion.qubit_enc())) == set(map(str, correct))
 
 
 @pytest.mark.fusion
 def test_verify_fusion_result(state):
     fusion = Fusion(state)
-    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Sigma), AnyonModel.Ising)
-    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Vacuum), AnyonModel.Ising)
-    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Psi), AnyonModel.Ising)
+    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Sigma))
+    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Vacuum))
+    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Psi))
 
     state.add_anyon(Anyon('7', TopoCharge.from_ising(IsingTopoCharge.Sigma), (0, 0)))
     fusion = Fusion(state)
-    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Vacuum), AnyonModel.Ising)
-    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Psi), AnyonModel.Ising)
-    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Sigma), AnyonModel.Ising)
+    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Vacuum))
+    assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Psi))
+    assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Sigma))
 
 @pytest.mark.fusion
 def test_minimum_possible_anyons(state):
 
     fusion = Fusion(state)
 
-    assert (fusion.minimum_possible_anyons(10, AnyonModel.Ising) == [21,22])
-    assert (fusion.minimum_possible_anyons(5, AnyonModel.Ising) == [11,12])
+    assert (fusion.minimum_possible_anyons(10) == [21,22])
+    assert (fusion.minimum_possible_anyons(5) == [11,12])
 
+    state.set_anyon_model(AnyonModel.Fibonacci)
 
-    assert(fusion.minimum_possible_anyons(10, AnyonModel.Fibonacci) == [17,18]);
-    assert(fusion.minimum_possible_anyons(0, AnyonModel.Fibonacci) == [0,1,2,3]);
+    fusion = Fusion(state)
+
+    
+
+    assert(fusion.minimum_possible_anyons(10) == [17,18]);
+    assert(fusion.minimum_possible_anyons(0) == [0,1,2,3]);
