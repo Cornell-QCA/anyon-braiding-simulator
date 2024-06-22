@@ -10,7 +10,7 @@ from Braiding import Braid
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'model')))
 
-from anyon_braiding_simulator import Anyon, IsingTopoCharge, TopoCharge
+from anyon_braiding_simulator.anyon_braiding_simulator import Anyon, IsingTopoCharge, TopoCharge
 
 
 @pytest.fixture

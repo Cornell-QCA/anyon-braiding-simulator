@@ -47,4 +47,4 @@ indent-style = "space"
 docstring-code-format = true
 
 [tool.pyright]
-include = ["python", "target/wheels", "venv/lib/python3.12/site-packages/"]
+include = ["python/anyon_braiding_simulator"]

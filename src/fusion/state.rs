@@ -4,7 +4,7 @@ use pyo3::prelude::*;
 
 /// The state of the system
 #[pyclass]
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 /// Stores the overall state of the system. Use this struct to keep track of any
 /// common information throughout the simulation (e.g. anyons, operations,
 /// statevector).
@@ -13,8 +13,8 @@ pub struct State {
     anyons: Vec<Anyon>,
     #[pyo3(get)]
     operations: Vec<(u32, FusionPair)>,
-    // #[pyo3(get)]
-    // state_vec: StateVec,
+    #[pyo3(get)]
+    state_vec: StateVec,
 }
 
 /// Internal Methods
@@ -62,6 +62,7 @@ impl State {
         State {
             anyons: Vec::new(),
             operations: Vec::new(),
+            state_vec: StateVec::new(1, None),
         }
     }
 
