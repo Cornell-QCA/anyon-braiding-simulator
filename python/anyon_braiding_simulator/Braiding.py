@@ -1,17 +1,18 @@
 import numpy as np
-from anyon_braiding_simulator import State, Model, AnyonModel
+from anyon_braiding_simulator import State, Fusion, AnyonModel, Model
 
 class Braid:
-    def __init__(self, state: State, model_type: AnyonModel):
+    def __init__(self, state: State, model: Model):
         """
         Parameters:
-        state (State): The state of the system containing anyons and fusion operations
-        model_type (AnyonModel): Model to use for the braid simulation
+        - state (State): The state of the system containing anyons and fusion operations
+        - model_type (AnyonModel): Model to use for the braid simulation
         """
         self.state = state
         self.anyons = state.anyons
         self.swaps = []
-        self.model = model_type
+        self.model = model
+        self.fusion = Fusion(state)
 
         # Check if there are fewer than 3 anyons
         if len(state.anyons) < 3:
@@ -27,54 +28,79 @@ class Braid:
         Swaps the positions of anyons in list "anyons" based on provided swaps to occur at a given time
 
         Parameters:
-        time (int): Time step at which the swaps are performed
-        swaps (list): List of tuples where each tuple is a pair of anyon indices to swap
+        - time (int): Time step at which the swaps are performed
+        - swaps (list): List of tuples where each tuple is a pair of anyon indices to swap
 
         Swaps only adjacent anyons
         """
-        used_indices = set()  # Set to keep track of used indices
-
-        # Make sure the swaps list is long enough for the current time
+        # Extend self.swaps if necessary
         while len(self.swaps) < time:
             self.swaps.append([])
 
-        for swap in swaps:
-            if len(swap) != 2:
-                print(f'Invalid swap tuple {swap} at time {time}')
+        # Track used indices directly in the swaps list
+        used_indices = set([swap for sublist in self.swaps[:time] for swap in sublist])
+
+        for index_A, index_B in swaps:
+            if len(set([index_A, index_B])) != 2:
+                print(f'Invalid swap tuple ({index_A}, {index_B}) at time {time}')
                 continue
-            
-            index_A, index_B = swap
 
-            # Perform the swap if indices are adjacent and not already used
-            if abs(index_A - index_B) == 1 and index_A not in used_indices and index_B not in used_indices:
-                self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
-                self.swaps[time-1].append((index_A, index_B))  # Update the swaps list
-                used_indices.add(index_A)
-                used_indices.add(index_B)
-            else:
-                print(f'The pair {swap} could not be swapped at time {time}')
+            if abs(index_A - index_B) != 1:
+                print(f'The pair ({index_A}, {index_B}) could not be swapped at time {time}')
+                continue
 
-    def generate_swap_matrix(self, time: int, index_A: int, index_B: int) -> np.ndarray:
+            if index_A in used_indices or index_B in used_indices:
+                print(f'One or both indices ({index_A}, {index_B}) are already used at time {time}')
+                continue
+
+            # Perform the swap
+            self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
+            self.swaps[time - 1].append((index_A, index_B))
+            used_indices.add(index_A)
+            used_indices.add(index_B)
+
+    def swap_to_qubit(self, time: int, swap_index: int) -> int:
         """
-        Generates the swap matrix for swapping anyons at index_A and index_B at given time
+        Determines which qubit the swap operation is acting on
 
         Parameters:
-        - time (int): Time step at which the swap occurs
-        - index_A (int): Index of anyon A to swap
-        - index_B (int): Index of anyon B to swap
+        - time (int): Time step at which the swap(s) are performed
+        - swap_index (int): Index of the swap operation in the swaps list
+        """
+        # Get the swap at the desired time
+        swap = self.swaps[time-1] if time > 0 else []
+
+        # Get the indices of the swap anyons
+        index_A, index_B = swap[swap_index]
+
+        # Iterate through the qubit encoding to find the matching qubit
+        for qubit_index, fusion_pair in enumerate(self.fusion.qubit_enc()):
+            if {index_A, index_B} == {fusion_pair.anyon_1, fusion_pair.anyon_2}:
+                return qubit_index
+
+        # If no matching qubit is found or if indices are out of range
+        return None
+    
+    def generate_swap_matrix(self, time: int, swap_index: int) -> np.ndarray:
+        """
+        Generates the swap matrix for swapping anyons at given time
+
+        Parameters:
+        - time (int): Time step at which the swap(s) are performed
+        - swap_index (int): Index of the swap operation in the swaps list
 
         Returns:
         - np.ndarray: Swap matrix F^{-1}RF or R depending on fusion tree
         """
+        # Get the indices of the anyons to swap
+        index_A, index_B = self.swaps[time-1][swap_index]
+        
         # Check if indices are valid
         if index_A < 0 or index_A >= len(self.anyons) or index_B < 0 or index_B >= len(self.anyons):
             raise ValueError("Invalid anyon indices")
 
-        # Get fusion operations up to time step 'time'
-        fusion_operations = self.state.operations[:time]
-
         # Check if index_A and index_B are adjacent in fusion operations
-        if self.are_adjacent_in_fusion(fusion_operations, index_A, index_B):
+        if self.is_direct_swap(index_A, index_B):
             # Direct swap using R matrix
             swap_matrix = self.model._r_mtx
         else:
@@ -84,24 +110,46 @@ class Braid:
             swap_matrix = np.dot(swap_matrix, self.model._f_mtx)
 
         return swap_matrix
-    
-    def are_adjacent_in_fusion(self, state: State, index_A: int, index_B: int) -> bool:
+
+    def generate_overall_unitary(self, time: int, swap_index: int) -> np.ndarray:
+        qubit_encoding = self.fusion.qubit_enc()
+        if qubit_encoding is None:
+            raise ValueError("Fusion qubit encoding returned None")
+
+        num_qubits = len(self.fusion.qubit_enc())
+        unitary = np.eye(2**num_qubits)  # Start with identity matrix of appropriate size
+
+        for i in range(num_qubits):
+            swap_qubit_index = self.swap_to_qubit(time, swap_index)
+            if i == swap_qubit_index:
+                swap_matrix = self.generate_swap_matrix(time, swap_index)
+                unitary = np.kron(unitary, swap_matrix)
+            else:
+                unitary = np.kron(unitary, np.eye(2))  # Kronecker with identity for non-involved qubits
+
+        return unitary
+
+    def is_direct_swap(self, index_A: int, index_B: int) -> bool:
         """
-        Checks if two anyons at indices index_A and index_B are adjacent in fusion operations
+        Checks if two anyons at indices index_A and index_B have a fusion operation at time 1
 
         Parameters:
-        - fusion_operations (list): List of fusion operations up to current time
         - index_A (int): Index of anyon A
         - index_B (int): Index of anyon B
 
         Returns:
-        - bool: True if index_A and index_B are adjacent, False otherwise
+        - bool: True if index_A and index_B have a fusion operation at time 1, False otherwise
         """
-        for operations_at_time in state.operations:
-            for fusion_pair in operations_at_time:
-                if (fusion_pair[0] == index_A and fusion_pair[1] == index_B) or \
-                   (fusion_pair[0] == index_B and fusion_pair[1] == index_A):
+        # Get most recent fusion operation at time step 1
+        fusion_operations = self.state.operations
+
+        # Check if anyon indices index_A and index_B are adjacent in fusion operations at time 1
+        for fusion in fusion_operations:
+            if fusion[0] == 1:
+                if {index_A, index_B} == {fusion[1].anyon_1, fusion[1].anyon_2}:
                     return True
+        
+        # No fusion operation found at time 1 for the given indices
         return False
     
     def __str__(self) -> str:
