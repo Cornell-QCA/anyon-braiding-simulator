@@ -3,11 +3,14 @@ mod fusion;
 mod model;
 mod util;
 
-/// A Python module implemented in Rust.
+/// This builds the bindings for maturin and enables the python module to be
+/// imported. For any new class which should be accessible by python, add it
+/// here following the same format
 #[pymodule]
 fn anyon_braiding_simulator(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<model::anyon::Anyon>()?;
     m.add_class::<model::anyon::IsingTopoCharge>()?;
+    m.add_class::<model::anyon::TopoCharge>()?;
 
     m.add_class::<model::model::Model>()?;
     m.add_class::<model::model::AnyonModel>()?;

@@ -1,6 +1,5 @@
 use pyo3::prelude::*;
 
-use crate::fusion::fusion::AccessFusionPair;
 use crate::fusion::fusion::FusionPair;
 
 #[pyclass]
