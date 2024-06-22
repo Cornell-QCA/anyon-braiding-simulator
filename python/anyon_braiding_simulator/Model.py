@@ -59,6 +59,12 @@ class Model:
 
         self._num_fusion_channels = num_fusion_channels
 
+    def get_model_type(self) -> AnyonModel:
+        """
+        Provides the model type
+        """
+        return self.model_type
+
     def get_charges(self) -> set:
         """
         Provide the charges that are defined in this model.

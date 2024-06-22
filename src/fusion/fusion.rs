@@ -1,14 +1,21 @@
 use std::collections::HashMap;
 
-use crate::fusion::state::AccessState;
 use crate::fusion::state::State;
-use crate::model::anyon::AccessAnyon;
 use crate::model::anyon::IsingTopoCharge;
+use crate::model::anyon::TopoCharge;
+use crate::model::model::AnyonModel;
 use crate::util::basis::Basis;
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 #[pyclass]
 #[derive(Clone, Debug, PartialEq, Hash, Eq, Ord, PartialOrd)]
+/// Represents a pair of anyons indices that are fused. The indices are derived
+/// from the relative ordering in the list of anyons stored in State.
+/// FusionPair is used to represent the fusion events along the fusion tree.
+///
+/// When two anyons are fused, the resulting anyon carries the lower index. i.e.
+/// the anyon resulting from the fusion (1,2) is later referenced as 1
 pub struct FusionPair {
     #[pyo3(get)]
     anyon_1: usize,
@@ -16,16 +23,11 @@ pub struct FusionPair {
     anyon_2: usize,
 }
 
-pub trait AccessFusionPair {
-    fn anyon_1(&self) -> usize;
-    fn anyon_2(&self) -> usize;
-}
-
-impl AccessFusionPair for FusionPair {
-    fn anyon_1(&self) -> usize {
+impl FusionPair {
+    pub fn anyon_1(&self) -> usize {
         self.anyon_1
     }
-    fn anyon_2(&self) -> usize {
+    pub fn anyon_2(&self) -> usize {
         self.anyon_2
     }
 }
@@ -43,11 +45,129 @@ impl FusionPair {
 }
 
 #[pyclass]
+/// Stores the state of the system and all fusion operations that occur in the
+/// fusion tree. The vector is 2D, where the outer vector represents the time
+/// step and the inner vector represents the fusion operations that occur at
+/// that time step.
 pub struct Fusion {
     state: State,
     ops: Vec<Vec<FusionPair>>,
 }
 
+/// Internal Methods
+impl Fusion {
+    /// Converts from IsingTopoCharge to internal format
+    /// Format is [psi, vacuum, sigma]  (so we can use the index as the encode)
+    pub fn ising_canonical_topo_charge(&self, charge: IsingTopoCharge) -> [u64; 3] {
+        match charge {
+            IsingTopoCharge::Psi => [1, 0, 0],
+            IsingTopoCharge::Vacuum => [0, 1, 0],
+            IsingTopoCharge::Sigma => [0, 0, 1],
+        }
+    }
+
+    /// Creates a qubit encoding from the fusion tree. The encoding is a list of
+    /// FusionPairs that represent the anyons that are fused to create the qubit
+    /// encoding.
+    pub fn ising_qubit_enc(&self) -> Vec<FusionPair> {
+        let mut tcs: Vec<[u64; 3]> = self
+            .state
+            .anyons()
+            .iter()
+            .map(|a| self.ising_canonical_topo_charge(a.charge().get_ising()))
+            .collect();
+        let mut fusion_pair_tc: HashMap<FusionPair, [u64; 3]> = HashMap::new();
+
+        let mut final_tc: [u64; 3] = [0, 0, 0];
+
+        for (i, op) in self.ops.iter().enumerate() {
+            for (j, fusion_pair) in op.iter().enumerate() {
+                let tc =
+                    self.ising_apply_fusion(tcs[fusion_pair.anyon_1()], tcs[fusion_pair.anyon_2()]);
+                if i == self.ops.len() - 1 && j == op.len() - 1 {
+                    final_tc = tc;
+                    break;
+                }
+                fusion_pair_tc.insert(fusion_pair.clone(), tc);
+                tcs[fusion_pair.anyon_1()] = tc;
+            }
+        }
+
+        if final_tc[IsingTopoCharge::Sigma.value()] == 0
+            && ((final_tc[IsingTopoCharge::Psi.value()] == 1
+                && final_tc[IsingTopoCharge::Vacuum.value()] == 0)
+                || (final_tc[IsingTopoCharge::Psi.value()] == 1
+                    && final_tc[IsingTopoCharge::Vacuum.value()] == 0))
+        {
+            return Vec::new();
+        }
+
+        let mut encoding_fusions: Vec<FusionPair> = fusion_pair_tc
+            .into_iter()
+            .filter(|(_, tc)| tc[IsingTopoCharge::Sigma.value()] == 0)
+            .map(|(fusion_pair, _)| fusion_pair)
+            .collect();
+        encoding_fusions.sort();
+        encoding_fusions.pop().unwrap();
+        encoding_fusions
+    }
+
+    /// Applies the fusion rules to two anyons and returns the resulting anyon(s).
+    pub fn ising_apply_fusion(&self, anyon_1: [u64; 3], anyon_2: [u64; 3]) -> [u64; 3] {
+        let add = |a: [u64; 3], b: [u64; 3]| -> [u64; 3] { std::array::from_fn(|i| a[i] + b[i]) };
+        let arr_scale = |a: [u64; 3], b: u64| -> [u64; 3] { std::array::from_fn(|i| a[i] * b) };
+
+        let mut output = [0 as u64; 3];
+
+        // ising fusion rules
+        // symmetric matrix which is built from fusion rules of (psi, 1, sigma) ^ (psi, 1, sigma)
+        let fusion_rules_mtx: [[[u64; 3]; 3]; 3] = [
+            [[0, 1, 0], [1, 0, 0], [0, 0, 1]],
+            [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+            [[0, 0, 1], [0, 0, 1], [1, 1, 0]],
+        ];
+
+        // build the outer product of the two tc vectors
+        let mut tc_mtx = [[0; 3]; 3];
+        for i in 0..tc_mtx.len() {
+            for j in 0..tc_mtx[i].len() {
+                tc_mtx[i][j] = anyon_1[i] * anyon_2[j];
+            }
+        }
+
+        // mtx multiply fusion rules with tc_mtx
+        for i in 0..3 {
+            for j in 0..3 {
+                output = add(output, arr_scale(fusion_rules_mtx[i][j], tc_mtx[i][j]));
+            }
+        }
+
+        output
+    }
+
+    /// Checks if an overall fusion result is possible given the state's
+    /// configuration and an initial topo charge
+    ///
+    /// Precondition: Non empty list of anyons
+    pub fn ising_verify_fusion_result(&self, init_charge: IsingTopoCharge) -> bool {
+        let overall_fusion_result: [u64; 3] = self
+            .state
+            .anyons()
+            .iter()
+            .map(|a| self.ising_canonical_topo_charge(a.charge().get_ising()))
+            .reduce(|acc, tc| self.ising_apply_fusion(acc, tc))
+            .unwrap();
+
+        // if an element > 0 that means it was our initial charge, so we need to
+        // check if our final fusion result also has that element > 0
+        overall_fusion_result
+            .iter()
+            .zip(self.ising_canonical_topo_charge(init_charge).iter())
+            .all(|(a, b)| *b <= 0 || *a > 0)
+    }
+}
+
+/// Python Facing Methods
 #[pymethods]
 impl Fusion {
     #[new]
@@ -74,55 +194,11 @@ impl Fusion {
         Ok(basis.verify_basis(self.state.anyons().len()))
     }
 
-    /// Assumes model is Ising
-    fn qubit_enc(&self) -> PyResult<Vec<FusionPair>> {
-        let enum_to_canonical = |charge: IsingTopoCharge| -> [u64; 3] {
-            match charge {
-                IsingTopoCharge::Psi => [1, 0, 0],
-                IsingTopoCharge::Vacuum => [0, 1, 0],
-                IsingTopoCharge::Sigma => [0, 0, 1],
-            }
-        };
-        let mut tcs: Vec<[u64; 3]> = self
-            .state
-            .anyons()
-            .iter()
-            .map(|a| enum_to_canonical(a.charge()))
-            .collect();
-        let mut fusion_pair_tc: HashMap<FusionPair, [u64; 3]> = HashMap::new();
-
-        let mut final_tc: [u64; 3] = [0, 0, 0];
-
-        for (i, op) in self.ops.iter().enumerate() {
-            for (j, fusion_pair) in op.iter().enumerate() {
-                let tc =
-                    self.apply_fusion(tcs[fusion_pair.anyon_1()], tcs[fusion_pair.anyon_2()])?;
-                if i == self.ops.len() - 1 && j == op.len() - 1 {
-                    final_tc = tc;
-                    break;
-                }
-                fusion_pair_tc.insert(fusion_pair.clone(), tc);
-                tcs[fusion_pair.anyon_1()] = tc;
-            }
+    fn qubit_enc(&self, anyon_model: &AnyonModel) -> PyResult<Vec<FusionPair>> {
+        match anyon_model {
+            AnyonModel::Ising => Ok(self.ising_qubit_enc()),
+            _ => Err(PyValueError::new_err("This model is not supported yet")),
         }
-
-        if final_tc[IsingTopoCharge::Sigma.value()] == 0
-            && ((final_tc[IsingTopoCharge::Psi.value()] == 1
-                && final_tc[IsingTopoCharge::Vacuum.value()] == 0)
-                || (final_tc[IsingTopoCharge::Psi.value()] == 1
-                    && final_tc[IsingTopoCharge::Vacuum.value()] == 0))
-        {
-            return Ok(Vec::new());
-        }
-
-        let mut encoding_fusions: Vec<FusionPair> = fusion_pair_tc
-            .into_iter()
-            .filter(|(_, tc)| tc[IsingTopoCharge::Sigma.value()] == 0)
-            .map(|(fusion_pair, _)| fusion_pair)
-            .collect();
-        encoding_fusions.sort();
-        encoding_fusions.pop().unwrap();
-        Ok(encoding_fusions)
     }
 
     /// Builds the fusion tree's graphical representation
@@ -150,9 +226,6 @@ impl Fusion {
                 }
             });
 
-            //
-            // here rishi :3
-            //
             for fusion_pair in level.iter() {
                 let start = 2 * (fusion_pair.anyon_1()) + 1;
                 let end = 2 * (fusion_pair.anyon_2());
@@ -177,38 +250,22 @@ impl Fusion {
         Ok(format!("{}\n{}\n{}{}", top_level, level_2, body, last_time).to_string())
     }
 
-    /// Fuses anyons according to their fusion rules
-    /// TODO: Generalize this to all models (has to be known size)
-    /// Format is [psi, vacuum, sigma]  (so we can use the index as the encode)
-    pub fn apply_fusion(&self, anyon_1: [u64; 3], anyon_2: [u64; 3]) -> PyResult<[u64; 3]> {
-        let add = |a: [u64; 3], b: [u64; 3]| -> [u64; 3] { std::array::from_fn(|i| a[i] + b[i]) };
-        let arr_scale = |a: [u64; 3], b: u64| -> [u64; 3] { std::array::from_fn(|i| a[i] * b) };
-
-        let mut output = [0 as u64; 3];
-
-        // ising fusion rules
-        // symmetric matrix which is built from fusion rules of (psi, 1, sigma) ^ (psi, 1, sigma)
-        let fusion_rules_mtx = [
-            [[0 as u64, 1, 0], [1, 0, 0], [0, 0, 1]],
-            [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
-            [[0, 0, 1], [0, 0, 1], [1, 1, 0]],
-        ];
-
-        // build the outer product of the two tc vectors
-        let mut tc_mtx = [[0; 3]; 3];
-        for i in 0..tc_mtx.len() {
-            for j in 0..tc_mtx[i].len() {
-                tc_mtx[i][j] = anyon_1[i] * anyon_2[j];
-            }
+    fn apply_fusion(
+        &self,
+        anyon_1: [u64; 3],
+        anyon_2: [u64; 3],
+        anyon_model: &AnyonModel,
+    ) -> PyResult<[u64; 3]> {
+        match anyon_model {
+            AnyonModel::Ising => Ok(self.ising_apply_fusion(anyon_1, anyon_2)),
+            _ => Err(PyValueError::new_err("This model is not supported yet")),
         }
+    }
 
-        // mtx multiply fusion rules with tc_mtx
-        for i in 0..3 {
-            for j in 0..3 {
-                output = add(output, arr_scale(fusion_rules_mtx[i][j], tc_mtx[i][j]));
-            }
+    fn verify_fusion_result(&self, init_charge: TopoCharge, anyon_model: &AnyonModel) -> bool {
+        match anyon_model {
+            AnyonModel::Ising => self.ising_verify_fusion_result(init_charge.get_ising()),
+            _ => false,
         }
-
-        return Ok(output);
     }
 }

@@ -10,16 +10,16 @@ from Braiding import Braid
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'model')))
 
-from anyon_braiding_simulator import Anyon, IsingTopoCharge
+from anyon_braiding_simulator import Anyon, IsingTopoCharge, TopoCharge
 
 
 @pytest.fixture
 def setup_anyons():
     return [
-        Anyon('A', IsingTopoCharge.Psi, (1, 1)),
-        Anyon('B', IsingTopoCharge.Psi, (2, 2)),
-        Anyon('C', IsingTopoCharge.Psi, (3, 3)),
-        Anyon('D', IsingTopoCharge.Psi, (4, 4)),
+        Anyon('A', TopoCharge.from_ising(IsingTopoCharge.Psi), (1, 1)),
+        Anyon('B', TopoCharge.from_ising(IsingTopoCharge.Psi), (2, 2)),
+        Anyon('C', TopoCharge.from_ising(IsingTopoCharge.Psi), (3, 3)),
+        Anyon('D', TopoCharge.from_ising(IsingTopoCharge.Psi), (4, 4)),
     ]
 
 
@@ -36,7 +36,7 @@ def test_braid_initialization(setup_anyons):
 
     # Test with duplicate anyon names
     duplicate_anyons = setup_anyons[:]
-    duplicate_anyons[3] = Anyon('A', IsingTopoCharge.Psi, (4, 4))
+    duplicate_anyons[3] = Anyon('A', TopoCharge.from_ising(IsingTopoCharge.Psi), (4, 4))
     with pytest.raises(ValueError, match='Duplicate anyon names detected'):
         Braid(duplicate_anyons)
 
