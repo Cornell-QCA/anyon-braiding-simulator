@@ -1,5 +1,6 @@
+from typing import List, Tuple
 import numpy as np
-from anyon_braiding_simulator import State, Fusion, Model, AnyonModel
+from anyon_braiding_simulator import State, Fusion, Model
 
 class Braid:
     def __init__(self, state: State, model: Model):
@@ -23,7 +24,7 @@ class Braid:
         if len(names) != len(set(names)):
             raise ValueError('Duplicate anyon names detected')
 
-    def swap(self, time: int, swaps: list[tuple[int, int]]) -> None:
+    def swap(self, time: int, swaps: List[Tuple[int, int]]) -> None:
         """
         Swaps the positions of anyons in list "anyons" based on provided swaps to occur at a given time
 

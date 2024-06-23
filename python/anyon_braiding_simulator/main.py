@@ -147,11 +147,14 @@ def braid(*args):
         print('Error: Not enough arguments')
         return
 
-    braid = Braid(sim.list_anyons())
+    braid = sim._braid
     cmd = args[0]
 
     if cmd.lower() == 'swap':
-        braid.swap(args[1], args[2])
+        index_A, index_B = sim.get_anyon_index(args[2], args[3])
+        swap = [(index_A, index_B)]
+        # swaps = [tuple(map(int, swap.replace('(', '').replace(')', '').split(','))) for swap in args[2].strip('[]').split('),(')]
+        braid.swap(int(args[1]), swap)
     elif cmd.lower() == 'print':
         print(braid)
     else:
@@ -203,6 +206,7 @@ class SimulatorShell(cmd.Cmd):
             if user_input.lower() == 'exit':
                 sys.exit(0)
             elif user_input.lower() == 'done':
+                sim._braid = Braid(sim.get_state(), sim.get_model())
                 break
 
             args = user_input.split(' ')
