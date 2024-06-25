@@ -53,7 +53,7 @@ def test_braid_swap(setup_state_and_anyons):
     braid = Braid(state, model)
 
     # Test valid swaps
-    braid.swap(1, [(0, 1), (2, 3)])
+    braid.swap([(0, 1), (2, 3)])
     assert braid.anyons[0].name == 'B'
     assert braid.anyons[1].name == 'A'
     assert braid.anyons[2].name == 'D'
@@ -62,7 +62,7 @@ def test_braid_swap(setup_state_and_anyons):
     assert braid.swaps[0] == [(0, 1), (2, 3)]
 
     # Test non-adjacent swap (should not occur)
-    braid.swap(2, [(0, 2)])
+    braid.swap([(0, 2)])
     assert braid.anyons[0].name == 'B'
     assert braid.anyons[1].name == 'A'
     assert braid.anyons[2].name == 'D'
@@ -71,7 +71,7 @@ def test_braid_swap(setup_state_and_anyons):
     assert braid.swaps[1] == []
 
     # Test adjacent swap with reused indices (should not occur)
-    braid.swap(3, [(1, 2), (2, 3)])
+    braid.swap([(1, 2), (2, 3)])
     assert braid.anyons[0].name == 'B'
     assert braid.anyons[1].name == 'D'
     assert braid.anyons[2].name == 'A'
@@ -84,9 +84,9 @@ def test_braid_str(setup_state_and_anyons):
     braid = Braid(state, model)
     
     # Perform swaps
-    braid.swap(1, [(0, 1), (2, 3)])
-    braid.swap(2, [(1, 2)])
-    braid.swap(3, [(3, 2)])
+    braid.swap([(0, 1), (2, 3)])
+    braid.swap([(1, 2)])
+    braid.swap([(3, 2)])
 
     expected = [
         '    \\   /   \\   /',
@@ -126,7 +126,7 @@ def test_parametrized_swaps(swaps, expected, setup_state_and_anyons):
     braid = Braid(state, model)
 
     # Perform swaps
-    braid.swap(1, swaps)
+    braid.swap(swaps)
 
     # Extract the names of anyons after swaps
     resulting_names = [anyon.name for anyon in braid.anyons]
@@ -165,11 +165,11 @@ def test_swap_to_qubit(setup_state):
     braid = setup_state
 
     # Swap (0, 1) 
-    braid.swap(1, [(0, 1)])
+    braid.swap([(0, 1)])
     assert braid.swap_to_qubit(1, 0) == 0    # Verify the qubit index is 0
 
     # Swap (2, 3) at time 2
-    braid.swap(2, [(2, 3)])
+    braid.swap([(2, 3)])
     assert braid.swap_to_qubit(2, 0) == 1    # Verify the qubit index is 1
 
 
@@ -193,26 +193,26 @@ def test_direct_swap(setup_braid):
     braid = setup_braid
 
     # Perform valid adjacent swaps
-    braid.swap(1, [(0, 1)])
+    braid.swap([(0, 1)])
     assert braid.is_direct_swap(0, 1) == True
 
     # Perform invalid adjacent swaps
-    braid.swap(2, [(2, 4)])
+    braid.swap([(2, 4)])
     assert braid.is_direct_swap(2, 4) == False
 
     # Perform valid non-adjacent swaps
-    braid.swap(3, [(0, 2)])
+    braid.swap([(0, 2)])
     assert braid.is_direct_swap(0, 2) == False
 
     # Perform invalid non-adjacent swaps
-    braid.swap(4, [(0, 3)])
+    braid.swap([(0, 3)])
     assert braid.is_direct_swap(0, 3) == False
 
 def test_generate_overall_unitary(setup_braid):
     braid = setup_braid
 
     # Perform valid adjacent swaps
-    braid.swap(1, [(0, 1)])
+    braid.swap([(0, 1)])
     unitary = braid.generate_overall_unitary(1, 0)
 
     # Assert the unitary matrix matches the expected matrix

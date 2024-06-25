@@ -24,9 +24,9 @@ class Braid:
         if len(names) != len(set(names)):
             raise ValueError('Duplicate anyon names detected')
 
-    def swap(self, time: int, swaps: List[Tuple[int, int]]) -> None:
+    def swap(self, swaps: List[Tuple[int, int]]) -> None:
         """
-        Swaps the positions of anyons in list "anyons" based on provided swaps to occur at a given time
+        Swaps the positions of anyons in list "anyons" based on provided swaps to occur at the present time
 
         Parameters:
         - time (int): Time step at which the swaps are performed
@@ -34,9 +34,8 @@ class Braid:
 
         Swaps only adjacent anyons
         """
-        # Extend self.swaps if necessary
-        while len(self.swaps) < time:
-            self.swaps.append([])
+        time = len(self.swaps)
+        self.swaps.append([])
 
         # Track used indices directly in the swaps list
         used_indices = set([swap for sublist in self.swaps[:time] for swap in sublist])
@@ -56,7 +55,7 @@ class Braid:
 
             # Perform the swap
             self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
-            self.swaps[time - 1].append((index_A, index_B))
+            self.swaps[time].append((index_A, index_B))
             used_indices.add(index_A)
             used_indices.add(index_B)
 

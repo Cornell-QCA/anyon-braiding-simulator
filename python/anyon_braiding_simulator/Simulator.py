@@ -9,6 +9,7 @@ class Simulator:
         user must first initialize the model and anyons.
         """
         self._anyons = []
+        self._fusion = None
         self._braid = None
         self._model = None
         self._dim_of_anyon_pos = 2  # Default is 2D anyon positions
@@ -61,18 +62,29 @@ class Simulator:
             state.add_anyon(anyon)
         return state
         
-    def get_anyon_index(self, anyon_1: str, anyon_2: str):
+    def pairs_to_indices(self, anyon_pairs: list) -> list:
+        """
+        Convert anyon names to indices and collect them in a list of tuples.
+        """
+        anyon_indices = []
+        for anyon_A, anyon_B in anyon_pairs:
+            try:
+                index_1 = self.get_anyon_index(anyon_A)
+                index_2 = self.get_anyon_index(anyon_B)
+                anyon_indices.append((index_1, index_2))
+                return anyon_indices
+            except ValueError as e:
+                print(e)
+                return
+
+    def get_anyon_index(self, anyon_name: str) -> int:
         """
         Get the index of two anyons from their names. 
         """
-        index_A = -1
-        index_B = -1
-        for i, anyon in enumerate(self._anyons):
-            if anyon.name == anyon_1:
-                index_A = i
-            if anyon.name == anyon_2:
-                index_B = i
-        return index_A, index_B
+        for index, anyon in enumerate(self._anyons):
+            if anyon.name == anyon_name:
+                return index
+        raise ValueError(f'Anyon with name {anyon_name} not found.')
 
     def get_dim_of_anyon_pos(self) -> int:
         """

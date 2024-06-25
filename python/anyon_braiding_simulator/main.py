@@ -7,6 +7,7 @@ from anyon_braiding_simulator.anyon_braiding_simulator import (
     Anyon,
     AnyonModel,
     FibonacciTopoCharge,
+    Fusion,
     IsingTopoCharge,
     TopoCharge,
 )
@@ -123,12 +124,13 @@ def fusion(*args):
         print('Error: Not enough arguments')
         return
 
-    # fusion = Fusion()
+    fusion = sim._fusion
     cmd = args[0]
 
     if cmd.lower() == 'fuse':
-        # anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
-        # fusion.fuse(*anyon_indices)
+        # anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
+        # anyon_indices = sim.pairs_to_indices(anyon_pairs)
+        # fusion.fuse(anyon_indices)
         pass
 
     elif cmd.lower() == 'print':
@@ -151,10 +153,16 @@ def braid(*args):
     cmd = args[0]
 
     if cmd.lower() == 'swap':
-        index_A, index_B = sim.get_anyon_index(args[2], args[3])
-        swap = [(index_A, index_B)]
-        # swaps = [tuple(map(int, swap.replace('(', '').replace(')', '').split(','))) for swap in args[2].strip('[]').split('),(')]
-        braid.swap(int(args[1]), swap)
+        if len(args) < 2:
+            print('Error: Not enough arguments for swap')
+            return
+        
+        # Parse the anyon name pairs and convert to indices
+        anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
+        anyon_indices = sim.pairs_to_indices(anyon_pairs)
+
+        # Perform the swap operations
+        braid.swap(anyon_indices)
     elif cmd.lower() == 'print':
         print(braid)
     else:
@@ -171,8 +179,8 @@ class SimulatorShell(cmd.Cmd):
         self.command_options = {
             'anyon': 'anyon <name> <topological charge> <{x,y} coords>',
             'model': 'model <Ising or Fibonacci>',
-            'fusion': 'fusion anyon_name_1 anyon_name_2 ...',
-            'braid': 'braid anyon_name_1 anyon_name_2 ...',
+            'fusion': 'fusion anyon_name_1-anyon_name_2 ...',
+            'braid': 'braid anyon_name_1-anyon_name_2 ...',
             'list': 'list',
         }
 
@@ -206,6 +214,7 @@ class SimulatorShell(cmd.Cmd):
             if user_input.lower() == 'exit':
                 sys.exit(0)
             elif user_input.lower() == 'done':
+                sim._fusion = Fusion(sim.get_state())
                 sim._braid = Braid(sim.get_state(), sim.get_model())
                 break
 
