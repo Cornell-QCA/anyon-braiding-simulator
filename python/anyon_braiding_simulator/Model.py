@@ -121,3 +121,63 @@ class Model:
                 raise ValueError('invalid anyon name')
 
         return self._f_mtx[anyondict[a]][anyondict[b]][anyondict[c]][anyondict[d]]
+
+    def getFInv(self, a: str, b: str, c: str, d: str) -> np.ndarray:
+        """
+        Parameters
+        ----------
+        a : str
+            name of anyon corresponding to first lower index
+        b : str
+            name of anyon corresponding to second lower index
+        c : str
+            name of anyon corresponding to third lower index
+        d : str
+            name of anyon corresponding to upper index
+
+        Only the following strings are accepted as parameters:
+        vacuum, sigma, psi
+
+        Requires that all anyons used as parameters are contained with the
+        given model
+
+        For details on notation, c.f.r. On classification of modular tensor
+        categories by Rowell, Stong, and Wang
+        https://www.arxiv.org/abs/0712.1377
+
+        Returns
+        -------
+        the Inverse F-matrix corresponding to the set of indices in the model
+        """
+
+        return np.linalg.inv(self.getFMatrix(a,b,c,d))
+
+    def getFInvRF(self, a: str, b: str, c: str, d: str) -> np.ndarray:
+        """
+        Parameters
+        ----------
+        a : str
+            name of anyon corresponding to first lower index
+        b : str
+            name of anyon corresponding to second lower index
+        c : str
+            name of anyon corresponding to third lower index
+        d : str
+            name of anyon corresponding to upper index
+
+        Only the following strings are accepted as parameters:
+        vacuum, sigma, psi
+
+        Requires that all anyons used as parameters are contained with the
+        given model
+
+        For details on notation, c.f.r. On classification of modular tensor
+        categories by Rowell, Stong, and Wang
+        https://www.arxiv.org/abs/0712.1377
+
+        Returns
+        -------
+        the matrix product of (F^-1)RF corresponding to the set of indices in the model
+        """
+
+        return self.getFInv(a,b,c,d) @ self._r_mtx @ self.getFMatrix(a,b,c,d)
