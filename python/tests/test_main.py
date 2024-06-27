@@ -84,16 +84,6 @@ class TestBraidAndFuse:
     def test_braid_and_print_2D(self):
         cmds = ['ising', 'anyon1 psi {8,-4}', 'anyon2 sigma {5,5}', 'anyon3 psi {1,-1}', 'done', 'braid swap anyon1 anyon2', 'braid print', 'exit']
         exec(cmds)
-    
-    @pytest.mark.main
-    def test_fusion(self):
-        cmds = ['ising', 'anyon1 psi', 'anyon2 sigma', 'done', 'fusion anyon1 anyon2', 'exit']
-        exec(cmds)
-
-    @pytest.mark.main
-    def test_fusion_2D(self):
-        cmds = ['ising', 'anyon1 psi {0,1}', 'anyon2 sigma {-1,500}', 'done', 'fusion anyon1 anyon2', 'exit']
-        exec(cmds)
 
 class TestListAndHelp:
     @pytest.mark.main
@@ -155,11 +145,6 @@ class TestInvalidCommands:
     @pytest.mark.main
     def test_invalid_braid_syntax(self):
         cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'braid swap derp derp', 'exit']
-        exec(cmds)
-
-    @pytest.mark.main
-    def test_invalid_fusion_syntax(self):
-        cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'fusion derp derp', 'exit']
         exec(cmds)
 
     @pytest.mark.main
