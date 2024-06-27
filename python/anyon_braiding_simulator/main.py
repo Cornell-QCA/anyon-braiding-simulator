@@ -56,8 +56,7 @@ def anyon(*args):
         # Make sure any previous anyons were specified in 1D space (i.e. without a position argument)
         if anyons and sim.get_dim_of_anyon_pos() == 2:
             print(
-                'Error: you have already provided an anyon in 2D space, so the rest must also have a \
-                    specified 2D position'
+                '\nError: you have already provided an anyon in 2D space, so the rest must also have a specified 2D position'
             )
             return
         elif not anyons:
@@ -69,8 +68,7 @@ def anyon(*args):
         # Make sure any previous anyons were specified in 2D space
         if sim.get_dim_of_anyon_pos() == 1:
             print(
-                'Error: you have already provided an anyon in 1D space, so the positions of the rest \
-                    cannot be specified in 2D'
+                '\nError: you have already provided an anyon in 1D space, so the positions of the rest cannot be specified in 2D'
             )
             return
 
@@ -89,9 +87,9 @@ def anyon(*args):
     try:
         sim.update_anyons(True, [new_anyon])
         if len(args) == 2:
-            print(f'Created anyon {name} with TC {topological_charge} at position {position[0]} in 1D')
+            print(f'\nCreated anyon {name} with TC {topological_charge} at position {position[0]} in 1D.')
         else:
-            print(f'Created anyon {name} with TC {topological_charge} at position {position} in 2D')
+            print(f'\nCreated anyon {name} with TC {topological_charge} at position {position} in 2D.')
     except ValueError:
         print('Error: An anyon with the same name already exists')
 
@@ -140,7 +138,7 @@ class SimulatorShell(cmd.Cmd):
 
     def __init__(self):
         super().__init__()
-        self.prompt = 'simulator> '
+        self.prompt = '\nsimulator> '
 
         self.command_options = {
             'anyon': 'anyon <name> <topological charge> <{x,y} coords>',
@@ -170,7 +168,7 @@ class SimulatorShell(cmd.Cmd):
             if no_anyons:
                 user_input = input(
                     '\nEnter the anyon name, topological charge, and optionally, the 2D position.'
-                    '\nUse the format <name> <topological charge> <{x,y}>.\n'
+                    '\nUse the format "<name> <topological charge> <{x,y}>".\n'
                     '> '
                 )
             else:
@@ -252,7 +250,7 @@ class SimulatorShell(cmd.Cmd):
     def do_help(self, arg):
         "Print help"
         cmds = ['braid', 'exit', 'list']
-        print(f'Commands: {", ".join(sorted(cmds))}')
+        print(f'\nCommands: {", ".join(sorted(cmds))}')
 
 
 if __name__ == '__main__':
