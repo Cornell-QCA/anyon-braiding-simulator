@@ -115,30 +115,6 @@ def model(*args):
     model = Model(model_convert[model_type.lower()])
     sim.set_model(model)
 
-
-def fusion(*args):
-    """
-    Handle the fusion command. This command executes the various fusion operations.
-    """
-    if len(args) < 1:
-        print('Error: Not enough arguments')
-        return
-
-    # fusion = Fusion()
-    cmd = args[0]
-
-    if cmd.lower() == 'fuse':
-        # anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
-        # fusion.fuse(*anyon_indices)
-        pass
-
-    elif cmd.lower() == 'print':
-        # print(fusion)
-        pass
-    else:
-        print('Error: Unknown fusion command')
-
-
 def braid(*args):
     """
     Handle the braid command. This command executes the various braid operations.
@@ -169,7 +145,6 @@ class SimulatorShell(cmd.Cmd):
         self.command_options = {
             'anyon': 'anyon <name> <topological charge> <{x,y} coords>',
             'model': 'model <Ising or Fibonacci>',
-            'fusion': 'fusion anyon_name_1 anyon_name_2 ...',
             'braid': 'braid anyon_name_1 anyon_name_2 ...',
             'list': 'list',
         }
@@ -253,14 +228,6 @@ class SimulatorShell(cmd.Cmd):
         else:
             model(*args)
 
-    def do_fusion(self, arg):
-        "Fuse anyons together"
-        args = arg.split(' ')
-        if args[0] == 'help' or args[0] == '-h':
-            print(self.command_options['fusion'])
-        else:
-            fusion(*args)
-
     def do_braid(self, arg):
         "Braid anyons together"
         args = arg.split(' ')
@@ -284,7 +251,7 @@ class SimulatorShell(cmd.Cmd):
 
     def do_help(self, arg):
         "Print help"
-        cmds = ['fusion', 'braid', 'exit', 'list']
+        cmds = ['braid', 'exit', 'list']
         print(f'Commands: {", ".join(sorted(cmds))}')
 
 
