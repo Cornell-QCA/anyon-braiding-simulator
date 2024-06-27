@@ -2,7 +2,6 @@
 import os
 
 import pytest
-from unittest.mock import patch
 import sh
 
 
@@ -129,6 +128,26 @@ class TestInvalidCommands:
         exec(cmds)
 
     @pytest.mark.main
+    def test_anyon_invalid_position1(self):
+        cmds = ['ising', 'anyon1 psi {3, 4, 5}', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_anyon_invalid_position2(self):
+        cmds = ['ising', 'anyon1 psi {5,}', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_anyon_invalid_position3(self):
+        cmds = ['ising', 'anyon1 psi [4,5]', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_anyon_invalid_position4(self):
+        cmds = ['ising', 'anyon1 psi {3; 5}', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
     def test_invalid_command_post_init(self):
         cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'derp', 'exit']
         exec(cmds)
@@ -152,11 +171,3 @@ class TestInvalidCommands:
     def test_anyon_post_init(self):
         cmds = ['ising', 'anyon1 psi', 'done', 'anyon anyon2 psi', 'exit']
         exec(cmds)
-
-
-# @pytest.mark.main
-# def test_shell():
-#     with patch('subprocess.run') as mock_run:
-#         shell = SimulatorShell()
-#         shell.do_shell('echo Let\'s go, Brandon!')
-#         mock_run.assert_called_once_with('echo Hello, World!', shell=True)

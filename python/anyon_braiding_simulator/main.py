@@ -76,7 +76,8 @@ def anyon(*args):
 
         try:
             position = tuple(map(float, args[2].replace('{', '').replace('}', '').split(',')))
-            position[1]
+            if len(position) != 2:
+                raise ValueError
         except ValueError:
             print('Error: position must be formatted as {x,y} where x and y are numbers')
             return
@@ -205,7 +206,19 @@ class SimulatorShell(cmd.Cmd):
             elif user_input.lower() == 'done':
                 break
 
-            args = user_input.split(' ')
+            # Check for 2D position in input such that space is allowed (ex. {4, 5})
+            if '{' in user_input and '}' in user_input:
+                start = user_input.find('{')
+                end = user_input.find('}') + 1
+                coords = user_input[start:end]
+
+                mod_input = user_input.replace(coords, "COORDS_PLACEHOLDER")
+                args = mod_input.split()
+                # Replace placeholder with original coords (spaces removed)
+                args[args.index("COORDS_PLACEHOLDER")] = coords.replace(" ", "")
+            else:
+                args = user_input.split(' ')
+
             if len(args) < 2 or len(args) > 3:
                 print('Error: There should be either 2 or 3 arguments')
                 continue
@@ -214,14 +227,6 @@ class SimulatorShell(cmd.Cmd):
             no_anyons = False
 
         self.init_complete = True
-
-    def do_shell(self, arg):
-        "Run a shell command"
-        print('running shell command:', arg)
-        subprocess.run(
-            arg,
-            shell=True,
-        )
 
     def do_anyon(self, arg):
         "Add an anyon to the simulation"
@@ -279,7 +284,7 @@ class SimulatorShell(cmd.Cmd):
 
     def do_help(self, arg):
         "Print help"
-        cmds = ['anyon', 'model', 'fusion', 'braid', 'exit', 'list']
+        cmds = ['fusion', 'braid', 'exit', 'list']
         print(f'Commands: {", ".join(sorted(cmds))}')
 
 
