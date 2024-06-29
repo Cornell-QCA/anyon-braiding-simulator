@@ -75,3 +75,15 @@ def test_verify_fusion_result(state):
     assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Vacuum), AnyonModel.Ising)
     assert not fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Psi), AnyonModel.Ising)
     assert fusion.verify_fusion_result(TopoCharge.from_ising(IsingTopoCharge.Sigma), AnyonModel.Ising)
+
+@pytest.mark.fusion
+def test_minimum_possible_anyons(state):
+
+    fusion = Fusion(state)
+
+    assert (fusion.minimum_possible_anyons(10, AnyonModel.Ising) == [21,22])
+    assert (fusion.minimum_possible_anyons(5, AnyonModel.Ising) == [11,12])
+
+
+    assert(fusion.minimum_possible_anyons(10, AnyonModel.Fibonacci) == [17,18]);
+    assert(fusion.minimum_possible_anyons(0, AnyonModel.Fibonacci) == [0,1,2,3]);
