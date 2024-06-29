@@ -128,7 +128,40 @@ impl Fusion {
     /// FusionPairs that represent the anyons that are fused to create the qubit
     /// encoding.
     pub fn fibonacci_qubit_enc(&self) -> Vec<FusionPair> {
-        unimplemented!()
+        let mut tcs: Vec<Vec<u64>> = self
+            .state
+            .anyons()
+            .iter()
+            .map(|a| self.fibonacci_canonical_topo_charge(a.charge().get_fibonacci()))
+            .collect();
+        let mut fusion_pair_tc: HashMap<FusionPair, Vec<u64>> = HashMap::new();
+
+
+        for (i, op) in self.ops.iter().enumerate() {
+            for (j, fusion_pair) in op.iter().enumerate() {
+                let tc = self.fibonacci_apply_fusion(
+                    tcs[fusion_pair.anyon_1()].clone(),
+                    tcs[fusion_pair.anyon_2()].clone(),
+                );
+                if i == self.ops.len() - 1 && j == op.len() - 1 {
+                    break;
+                }
+                fusion_pair_tc.insert(fusion_pair.clone(), tc.clone());
+                tcs[fusion_pair.anyon_1()] = tc;
+            }
+        }
+
+        if self.state.anyons().len() == 3{
+            return Vec::new();
+        }
+        let mut encoding_fusions: Vec<FusionPair> = fusion_pair_tc
+            .into_iter()
+            .filter(|(_, tc)| tc[FibonacciTopoCharge::Tau.value()] >0 && tc[FibonacciTopoCharge::Vacuum.value()]>0)
+            .map(|(fusion_pair, _)| fusion_pair)
+            .collect();
+        encoding_fusions.sort();
+        encoding_fusions.pop().unwrap();
+        encoding_fusions
     }
 
     /// Applies the fusion rules to two anyons and returns the resulting anyon(s).
@@ -166,7 +199,7 @@ impl Fusion {
         Vec::from(output)
     }
     /// Applies the fusion rules to two anyones and returns the resulting anyon(s).
-    fn fibonacci_apply_fusion(&self, anyon_1: Vec<u64>, anyon_2: Vec<u64>) -> Vec<u64> {
+    pub fn fibonacci_apply_fusion(&self, anyon_1: Vec<u64>, anyon_2: Vec<u64>) -> Vec<u64> {
         assert!(anyon_1.len() == 2 && anyon_2.len() == 2);
 
         let add = |a: [u64; 2], b: [u64; 2]| -> [u64; 2] { std::array::from_fn(|i| a[i] + b[i]) };

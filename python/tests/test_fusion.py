@@ -77,9 +77,15 @@ def test_ising_qubit_enc(ising_state):
 
 @pytest.mark.fusion
 def test_fibo_qubit_enc(fibo_state):
+    fibo_state.add_operation(1, FusionPair(0, 1))
+    fibo_state.add_operation(1, FusionPair(2, 3))
+    fibo_state.add_operation(1, FusionPair(4, 5))
+    fibo_state.add_operation(2, FusionPair(2, 4))
+    fibo_state.add_operation(3, FusionPair(0, 2))
 
     fusion =  Fusion(fibo_state)
 
+    print(fusion.qubit_enc())
     pass
 
 

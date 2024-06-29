@@ -107,6 +107,19 @@ impl IsingTopoCharge {
     }
 }
 
+impl FibonacciTopoCharge {
+    pub fn value(&self) -> usize {
+        *self as usize
+    }
+
+    pub fn to_string(&self) -> &str {
+        match self {
+            FibonacciTopoCharge::Tau => "Tau",
+            FibonacciTopoCharge::Vacuum => "Vacuum",
+        }
+    }
+}
+
 #[pyclass]
 #[derive(Clone, Debug, PartialEq)]
 /// In Topological Quantum Computing, anyons are the fundamental quasiparticles
