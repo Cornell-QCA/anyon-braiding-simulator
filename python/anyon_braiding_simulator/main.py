@@ -9,12 +9,13 @@ from anyon_braiding_simulator.anyon_braiding_simulator import (
     Fusion,
     IsingTopoCharge,
     TopoCharge,
+    State
 )
 from Braiding import Braid
 from Model import Model
 from Simulator import Simulator
 
-sim = Simulator()
+sim = Simulator(State())
 
 
 def anyon(*args):

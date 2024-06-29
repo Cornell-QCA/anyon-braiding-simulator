@@ -65,11 +65,21 @@ impl State {
             state_vec: StateVec::new(1, None),
         }
     }
-
+    
     /// Add an anyon to the state
     fn add_anyon(&mut self, anyon: Anyon) -> PyResult<bool> {
         self.anyons.push(anyon);
         Ok(true)
+    }
+
+    /// Remove an anyon from the state
+    fn remove_anyon(&mut self, anyon: &Anyon) -> PyResult<bool> {
+        if let Some(index) = self.anyons.iter().position(|a| a == anyon) {
+            self.anyons.remove(index);
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 
     /// Verifies and then adds an operation to the state

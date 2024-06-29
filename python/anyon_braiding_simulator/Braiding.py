@@ -1,6 +1,6 @@
 from typing import List, Tuple
 import numpy as np
-from anyon_braiding_simulator import State, Fusion, Model
+from anyon_braiding_simulator import State, Fusion, Model, Anyon
 
 class Braid:
     def __init__(self, state: State, model: Model):
@@ -10,26 +10,30 @@ class Braid:
         - model (Model): Model to use for the braid simulation
         """
         self.state = state
-        self.anyons = state.anyons
         self.swaps = []
         self.model = model
         self.fusion = Fusion(state)
 
         # Check if there are fewer than 3 anyons
-        if len(state.anyons) < 3:
+        if len(self.get_anyons()) < 3:
             raise ValueError('There must be at least 3 anyons')
 
         # Check for duplicate anyon names
-        names = [anyon.name for anyon in self.anyons]
+        names = [anyon.name for anyon in self.get_anyons()]
         if len(names) != len(set(names)):
             raise ValueError('Duplicate anyon names detected')
+        
+    def get_anyons(self) -> List[Anyon]:
+        """
+        Returns a list of the initialized anyons
+        """
+        return self.state.anyons
 
     def swap(self, swaps: List[Tuple[int, int]]) -> None:
         """
         Swaps the positions of anyons in list "anyons" based on provided swaps to occur at the present time
 
         Parameters:
-        - time (int): Time step at which the swaps are performed
         - swaps (list): List of tuples where each tuple is a pair of anyon indices to swap
 
         Swaps only adjacent anyons
@@ -54,7 +58,7 @@ class Braid:
                 continue
 
             # Perform the swap
-            self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
+            self.get_anyons()[index_A], self.get_anyons()[index_B] = self.get_anyons()[index_B], self.get_anyons()[index_A]
             self.swaps[time].append((index_A, index_B))
             used_indices.add(index_A)
             used_indices.add(index_B)
@@ -96,7 +100,7 @@ class Braid:
         index_A, index_B = self.swaps[time-1][swap_index]
         
         # Check if indices are valid
-        if index_A < 0 or index_A >= len(self.anyons) or index_B < 0 or index_B >= len(self.anyons):
+        if index_A < 0 or index_A >= len(self.get_anyons()) or index_B < 0 or index_B >= len(self.get_anyons()):
             raise ValueError("Invalid anyon indices")
 
         # Check if index_A and index_B are adjacent in fusion operations
@@ -161,7 +165,7 @@ class Braid:
             return ''
 
         # Initialize the output for each anyon
-        num_anyons = len(self.anyons)
+        num_anyons = len(self.get_anyons())
         max_time = len(self.swaps)  # Max time is now the length of the swaps list
         max_rows = max_time * 5
         output = [[' ' for _ in range(num_anyons * 5)] for _ in range(max_rows)]

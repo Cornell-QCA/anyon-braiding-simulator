@@ -3,12 +3,12 @@ from anyon_braiding_simulator import State
 
 
 class Simulator:
-    def __init__(self):
+    def __init__(self, state: State):
         """
         Creates a the simulator. In order for the simulator to be function, the
         user must first initialize the model and anyons.
         """
-        self._anyons = []
+        self._state = state
         self._fusion = None
         self._braid = None
         self._model = None
@@ -26,12 +26,13 @@ class Simulator:
         if is_increasing:
             # Check if any anyons are being added that are already in the simulator
             for anyon in anyons:
-                for anyon_in_sim in self._anyons:
+                for anyon_in_sim in self.list_anyons():
                     if anyon_in_sim.name == anyon.name:
                         raise ValueError('Anyon name is already in simulator')
-            self._anyons.extend(anyons)
+                self._state.add_anyon(anyon)
         else:
-            self._anyons = [anyon for anyon in self._anyons if anyon not in anyons]
+            for anyon in anyons:
+                self._state.remove_anyon(anyon)
 
     def set_model(self, model: Model) -> None:
         """
@@ -46,21 +47,18 @@ class Simulator:
         if self._model is None:
             raise ValueError('Model has not been set')
         return self._model
+    
+    def get_state(self) -> State:
+        """
+        Get the state of the simulator.
+        """
+        return self._state
 
     def list_anyons(self) -> list:
         """
         List the anyons currently in the simulator.
         """
-        return self._anyons
-    
-    def get_state(self) -> State:
-        """
-        Initializes the state of the simulator.
-        """
-        state = State()
-        for anyon in self._anyons:
-            state.add_anyon(anyon)
-        return state
+        return self._state.anyons
         
     def pairs_to_indices(self, anyon_pairs: list) -> list:
         """
@@ -80,7 +78,7 @@ class Simulator:
         """
         Get the index of two anyons from their names. 
         """
-        for index, anyon in enumerate(self._anyons):
+        for index, anyon in enumerate(self.list_anyons()):
             if anyon.name == anyon_name:
                 return index
         raise ValueError(f'Anyon with name {anyon_name} not found.')
@@ -101,6 +99,4 @@ class Simulator:
         """
         Check if the anyon is in the simulator.
         """
-        return anyon_name in [anyon.name for anyon in self._anyons]
-
-    # waiting on other classes to be implemented
+        return anyon_name in [anyon.name for anyon in self.list_anyons()]

@@ -29,7 +29,7 @@ def test_braid_initialization(setup_state_and_anyons):
     
     # Test with valid anyons
     braid = Braid(state, model)
-    assert len(braid.anyons) == 4
+    assert len(braid.get_anyons()) == 4
     assert len(braid.swaps) == 0
 
     # Test with fewer than 3 anyons
@@ -54,28 +54,28 @@ def test_braid_swap(setup_state_and_anyons):
 
     # Test valid swaps
     braid.swap([(0, 1), (2, 3)])
-    assert braid.anyons[0].name == 'B'
-    assert braid.anyons[1].name == 'A'
-    assert braid.anyons[2].name == 'D'
-    assert braid.anyons[3].name == 'C'
+    assert braid.get_anyons()[0].name == 'B'
+    assert braid.get_anyons()[1].name == 'A'
+    assert braid.get_anyons()[2].name == 'D'
+    assert braid.get_anyons()[3].name == 'C'
     assert len(braid.swaps) == 1
     assert braid.swaps[0] == [(0, 1), (2, 3)]
 
     # Test non-adjacent swap (should not occur)
     braid.swap([(0, 2)])
-    assert braid.anyons[0].name == 'B'
-    assert braid.anyons[1].name == 'A'
-    assert braid.anyons[2].name == 'D'
-    assert braid.anyons[3].name == 'C'
+    assert braid.get_anyons()[0].name == 'B'
+    assert braid.get_anyons()[1].name == 'A'
+    assert braid.get_anyons()[2].name == 'D'
+    assert braid.get_anyons()[3].name == 'C'
     assert len(braid.swaps) == 2
     assert braid.swaps[1] == []
 
     # Test adjacent swap with reused indices (should not occur)
     braid.swap([(1, 2), (2, 3)])
-    assert braid.anyons[0].name == 'B'
-    assert braid.anyons[1].name == 'D'
-    assert braid.anyons[2].name == 'A'
-    assert braid.anyons[3].name == 'C'
+    assert braid.get_anyons()[0].name == 'B'
+    assert braid.get_anyons()[1].name == 'D'
+    assert braid.get_anyons()[2].name == 'A'
+    assert braid.get_anyons()[3].name == 'C'
     assert len(braid.swaps) == 3
     assert braid.swaps[2] == [(1, 2)]
 
@@ -129,7 +129,7 @@ def test_parametrized_swaps(swaps, expected, setup_state_and_anyons):
     braid.swap(swaps)
 
     # Extract the names of anyons after swaps
-    resulting_names = [anyon.name for anyon in braid.anyons]
+    resulting_names = [anyon.name for anyon in braid.get_anyons()]
 
     # Assert the result matches the expected output
     assert resulting_names == expected
