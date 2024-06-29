@@ -89,11 +89,11 @@ def anyon(*args):
     try:
         sim.update_anyons(True, [new_anyon])
         if len(args) == 2:
-            print(f'Created anyon {name} with TC {topological_charge} at position {position[0]} in 1D')
+            print(f'\nCreated anyon {name} with TC {topological_charge} at position {position[0]} in 1D')
         else:
-            print(f'Created anyon {name} with TC {topological_charge} at position {position} in 2D')
+            print(f'\nCreated anyon {name} with TC {topological_charge} at position {position} in 2D')
     except ValueError:
-        print('Error: An anyon with the same name already exists')
+        print('\nError: An anyon with the same name already exists')
 
 
 def model(*args):
@@ -158,8 +158,12 @@ def braid(*args):
             return
         
         # Parse the anyon name pairs and convert to indices
-        anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
-        anyon_indices = sim.pairs_to_indices(anyon_pairs)
+        try:
+            anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
+            anyon_indices = sim.pairs_to_indices(anyon_pairs)
+        except ValueError:
+            print('\nError: A given anyon name does not exist in the simulator.')
+            return
 
         # Perform the swap operations
         braid.swap(anyon_indices)
@@ -209,14 +213,17 @@ class SimulatorShell(cmd.Cmd):
                     '> '
                 )
             else:
-                user_input = input('\nContinue adding anyons, or type "done" when finished initializing.\n' '> ')
+                user_input = input('\nContinue adding anyons (at least 3 total), or type "done" when finished initializing.\n' '> ')
 
             if user_input.lower() == 'exit':
                 sys.exit(0)
-            elif user_input.lower() == 'done':
+            elif user_input.lower() == 'done' and len(sim.list_anyons()) >= 3:
                 sim._fusion = Fusion(sim.get_state())
                 sim._braid = Braid(sim.get_state(), sim.get_model())
                 break
+            elif user_input.lower() == 'done' and len(sim.list_anyons()) < 3:
+                print('\nError: At least 3 anyons are required to initialize the simulation.')
+                continue
 
             args = user_input.split(' ')
             if len(args) < 2 or len(args) > 3:
