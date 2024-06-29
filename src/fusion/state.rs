@@ -1,4 +1,5 @@
 use crate::{fusion::fusion::FusionPair, model::anyon::Anyon, model::model::AnyonModel};
+use crate::util::statevec::StateVec;
 use pyo3::prelude::*;
 
 /// The state of the system
@@ -14,6 +15,8 @@ pub struct State {
     operations: Vec<(u32, FusionPair)>,
     #[pyo3(get)]
     anyon_model: AnyonModel,
+    #[pyo3(get)]
+    state_vec: StateVec,
 }
 
 /// Internal Methods
@@ -66,6 +69,7 @@ impl State {
             anyons: Vec::new(),
             operations: Vec::new(),
             anyon_model: AnyonModel::Ising, //Assume model is Ising by default
+            state_vec: StateVec::new(1, None),
         }
     }
 

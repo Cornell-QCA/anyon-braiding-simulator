@@ -1,5 +1,5 @@
 import pytest
-from anyon_braiding_simulator import Anyon, IsingTopoCharge, TopoCharge
+from anyon_braiding_simulator.anyon_braiding_simulator import Anyon, IsingTopoCharge, TopoCharge
 
 
 @pytest.mark.anyon

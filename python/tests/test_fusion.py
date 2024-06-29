@@ -1,5 +1,13 @@
 import pytest
-from anyon_braiding_simulator import Anyon, AnyonModel, Fusion, FusionPair, IsingTopoCharge, FibonacciTopoCharge, State, TopoCharge
+from anyon_braiding_simulator.anyon_braiding_simulator import (
+    Anyon,
+    AnyonModel,
+    Fusion,
+    FusionPair,
+    IsingTopoCharge,
+    State,
+    TopoCharge,
+)
 
 
 @pytest.fixture

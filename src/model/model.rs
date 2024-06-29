@@ -18,3 +18,4 @@ impl AnyonModel {
         AnyonModel::Ising
     }
 }
+

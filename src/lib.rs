@@ -13,6 +13,7 @@ fn anyon_braiding_simulator(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<model::anyon::FibonacciTopoCharge>()?;
     m.add_class::<model::anyon::TopoCharge>()?;
 
+    m.add_class::<model::model::Model>()?;
     m.add_class::<model::model::AnyonModel>()?;
 
     m.add_class::<fusion::fusion::Fusion>()?;
@@ -21,5 +22,6 @@ fn anyon_braiding_simulator(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<fusion::state::State>()?;
 
     m.add_class::<util::basis::Basis>()?;
+    m.add_class::<util::statevec::StateVec>()?;
     Ok(())
 }
