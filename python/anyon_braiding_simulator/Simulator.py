@@ -61,22 +61,18 @@ class Simulator:
         for anyon in self._anyons:
             state.add_anyon(anyon)
         return state
-        
-    def pairs_to_indices(self, anyon_pairs: list) -> list:
-        """
-        Convert anyon names to indices and collect them in a list of tuples.
-        """
-        anyon_indices = []
-        for anyon_A, anyon_B in anyon_pairs:
-            try:
-                index_1 = self.get_anyon_index(anyon_A)
-                index_2 = self.get_anyon_index(anyon_B)
-                anyon_indices.append((index_1, index_2))
-                return anyon_indices
-            except ValueError as e:
-                print(e)
-                return
 
+    def validate_and_parse_pairs(self, pairs: str) -> list:
+        valid_pairs = []
+        for pair in pairs:
+            if '-' not in pair:
+                raise ValueError(f"Invalid pair format: {pair}. Expected format: anyon_A-anyon_B")
+            anyon_A, anyon_B = pair.split('-')
+            
+            valid_pairs.append((self.get_anyon_index(anyon_A), self.get_anyon_index(anyon_B)))
+
+        return valid_pairs
+        
     def get_anyon_index(self, anyon_name: str) -> int:
         """
         Get the index of two anyons from their names. 

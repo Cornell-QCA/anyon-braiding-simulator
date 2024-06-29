@@ -104,10 +104,29 @@ class Braid:
             # Direct swap using R matrix
             swap_matrix = self.model._r_mtx
         else:
-            # Indices not adjacent, need basis transformation
-            swap_matrix = np.linalg.inv(self.model._f_mtx)
-            swap_matrix = np.dot(swap_matrix, self.model._r_mtx)
-            swap_matrix = np.dot(swap_matrix, self.model._f_mtx)
+             # Indices not adjacent, need basis transformation
+            fusion_operations = self.state.operations()
+            
+            # Find the fusion pair that affects index_A and index_B
+            fusion_pair_operation = None
+            for t, operation in fusion_operations:
+                if t == time:
+                    if (operation.anyon_1() == index_A and operation.anyon_2() == index_B) or \
+                    (operation.anyon_1() == index_B and operation.anyon_2() == index_A):
+                        fusion_pair_operation = operation
+                        break
+            
+            if fusion_pair_operation:
+                # Extract names of the anyons involved
+                a_name = self.anyons[index_A].name
+                b_name = self.anyons[index_B].name
+                c_name = self.anyons[fusion_pair_operation.anyon_1()].name
+                d_name = self.anyons[fusion_pair_operation.anyon_2()].name
+                
+                # Call getFInvRF with the names
+                swap_matrix = self.model.getFInvRF(a_name, b_name, c_name, d_name)
+            else:
+                raise ValueError("No valid fusion operation found")
 
         return swap_matrix
 

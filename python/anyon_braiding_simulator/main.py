@@ -128,9 +128,18 @@ def fusion(*args):
     cmd = args[0]
 
     if cmd.lower() == 'fuse':
-        # anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
-        # anyon_indices = sim.pairs_to_indices(anyon_pairs)
-        # fusion.fuse(anyon_indices)
+        # if len(args) < 2:
+        #     print('Error: Not enough arguments for fuse')
+        #     return
+
+        # pairs = args[1:]
+
+        # try:
+        #     valid_pairs = sim.validate_and_parse_pairs(pairs)
+        # except ValueError as e:
+        #     return str(e)
+        
+        # fusion.fuse(valid_pairs)
         pass
 
     elif cmd.lower() == 'print':
@@ -156,13 +165,16 @@ def braid(*args):
         if len(args) < 2:
             print('Error: Not enough arguments for swap')
             return
-        
-        # Parse the anyon name pairs and convert to indices
-        anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
-        anyon_indices = sim.pairs_to_indices(anyon_pairs)
 
-        # Perform the swap operations
-        braid.swap(anyon_indices)
+        pairs = args[1:]
+
+        try:
+            valid_pairs = sim.validate_and_parse_pairs(pairs)
+        except ValueError as e:
+            return str(e)
+        
+        braid.swap(valid_pairs)
+
     elif cmd.lower() == 'print':
         print(braid)
     else:
