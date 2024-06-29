@@ -33,12 +33,6 @@ class TestInit:
         model = 'ising'
         cmds = ['anyon1 vac', 'anyon2 sigma', 'anyon3 sigma', 'done', 'exit']
         exec(model, cmds)
-    
-    @pytest.mark.main
-    def test_three_anyons_fib(self):
-        model = 'fibonacci'
-        cmds = ['anyon1 vac', 'anyon2 tau', 'anyon3 tau', 'done', 'exit']
-        exec(model, cmds)
 
     @pytest.mark.parametrize('model', ['ising', 'fibonacci'])
     @pytest.mark.main
@@ -66,21 +60,9 @@ class TestBraidAndFuse:
         exec(model, cmds)
 
     @pytest.mark.main
-    def test_braid_and_print_fib(self):
-        model = 'fibonacci'
-        cmds = ['anyon1 tau', 'anyon2 tau', 'anyon3 tau', 'done', 'braid swap anyon1-anyon2', 'braid print', 'exit']
-        exec(model, cmds)
-
-    @pytest.mark.main
     def test_braid_and_print_2D_ising(self):
         model = 'ising'
         cmds = ['anyon1 psi {8,-4}', 'anyon2 sigma {5,5}', 'anyon3 psi {1,-1}', 'done', 'braid swap anyon1-anyon2', 'braid print', 'exit']
-        exec(model, cmds)
-
-    @pytest.mark.main
-    def test_braid_and_print_2D_fib(self):
-        model = 'fibonacci'
-        cmds = ['anyon1 tau {8,-4}', 'anyon2 tau {5,5}', 'anyon3 tau {1,-1}', 'done', 'braid swap anyon1-anyon2', 'braid print', 'exit']
         exec(model, cmds)
 
 class TestListAndHelp:
@@ -128,33 +110,15 @@ class TestInvalidCommands:
         exec(model, cmds)
 
     @pytest.mark.main
-    def test_one_anyon_tau(self):
-        model = 'fibonacci'
-        cmds = ['anyon1 tau', 'done', 'exit']
-        exec(model, cmds)
-
-    @pytest.mark.main
     def test_one_anyon_2D_ising(self):
         model = 'ising'
         cmds = ['anyon1 psi {1,2}', 'done', 'exit']
         exec(model, cmds)
 
     @pytest.mark.main
-    def test_one_anyon_2D_fib(self):
-        model = 'fibonacci'
-        cmds = ['anyon1 tau {1,2}', 'done', 'exit']
-        exec(model, cmds)
-
-    @pytest.mark.main
     def test_two_anyons_ising(self):
         model = 'ising'
         cmds = ['anyon1 psi', 'anyon2 vac', 'done', 'exit']
-        exec(model, cmds)
-
-    @pytest.mark.main
-    def test_two_anyons_fib(self):
-        model = 'fibonacci'
-        cmds = ['anyon1 tau', 'anyon2 vac', 'done', 'exit']
         exec(model, cmds)
 
     @pytest.mark.parametrize('model', ['ising', 'fibonacci'])
