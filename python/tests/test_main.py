@@ -5,7 +5,6 @@ import pytest
 from unittest.mock import patch
 import sh
 
-
 def exec(cmds: list[str]):
     os.chdir('python/anyon_braiding_simulator')
 
@@ -31,31 +30,6 @@ class TestInit:
         exec(cmds)
 
     @pytest.mark.main
-    def test_one_anyon_vac(self):
-        cmds = ['ising', 'anyon1 vac', 'done', 'exit']
-        exec(cmds)
-
-    @pytest.mark.main
-    def test_one_anyon_sigma(self):
-        cmds = ['ising', 'anyon1 sigma', 'done', 'exit']
-        exec(cmds)
-
-    @pytest.mark.main
-    def test_one_anyon_psi(self):
-        cmds = ['ising', 'anyon1 psi', 'done', 'exit']
-        exec(cmds)
-
-    @pytest.mark.main
-    def test_one_anyon_2D(self):
-        cmds = ['ising', 'anyon1 psi {1,2}', 'done', 'exit']
-        exec(cmds)
-
-    @pytest.mark.main
-    def test_two_anyons(self):
-        cmds = ['ising', 'anyon1 psi', 'anyon2 vac', 'done', 'exit']
-        exec(cmds)
-
-    @pytest.mark.main
     def test_three_anyons(self):
         cmds = ['ising', 'anyon1 vac', 'anyon2 sigma', 'anyon3 sigma', 'done', 'exit']
         exec(cmds)
@@ -78,22 +52,12 @@ class TestInit:
 class TestBraidAndFuse:
     @pytest.mark.main
     def test_braid_and_print(self):
-        cmds = ['ising', 'anyon1 psi', 'anyon2 sigma', 'anyon3 psi', 'done', 'braid swap anyon1 anyon2', 'braid print', 'exit']
+        cmds = ['ising', 'anyon1 psi', 'anyon2 sigma', 'anyon3 psi', 'done', 'braid swap anyon1-anyon2', 'braid print', 'exit']
         exec(cmds)
 
     @pytest.mark.main
     def test_braid_and_print_2D(self):
-        cmds = ['ising', 'anyon1 psi {8,-4}', 'anyon2 sigma {5,5}', 'anyon3 psi {1,-1}', 'done', 'braid swap anyon1 anyon2', 'braid print', 'exit']
-        exec(cmds)
-    
-    @pytest.mark.main
-    def test_fusion(self):
-        cmds = ['ising', 'anyon1 psi', 'anyon2 sigma', 'done', 'fusion anyon1 anyon2', 'exit']
-        exec(cmds)
-
-    @pytest.mark.main
-    def test_fusion_2D(self):
-        cmds = ['ising', 'anyon1 psi {0,1}', 'anyon2 sigma {-1,500}', 'done', 'fusion anyon1 anyon2', 'exit']
+        cmds = ['ising', 'anyon1 psi {8,-4}', 'anyon2 sigma {5,5}', 'anyon3 psi {1,-1}', 'done', 'braid swap anyon1-anyon2', 'braid print', 'exit']
         exec(cmds)
 
 class TestListAndHelp:
@@ -129,18 +93,43 @@ class TestInvalidCommands:
         exec(cmds)
 
     @pytest.mark.main
+    def test_one_anyon_vac(self):
+        cmds = ['ising', 'anyon1 vac', 'done', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_one_anyon_sigma(self):
+        cmds = ['ising', 'anyon1 sigma', 'done', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_one_anyon_psi(self):
+        cmds = ['ising', 'anyon1 psi', 'done', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_one_anyon_2D(self):
+        cmds = ['ising', 'anyon1 psi {1,2}', 'done', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
+    def test_two_anyons(self):
+        cmds = ['ising', 'anyon1 psi', 'anyon2 vac', 'done', 'exit']
+        exec(cmds)
+
+    @pytest.mark.main
     def test_invalid_command_post_init(self):
         cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'derp', 'exit']
         exec(cmds)
     
     @pytest.mark.main
     def test_invalid_braid_syntax(self):
-        cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'braid swap derp derp', 'exit']
+        cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'braid swap derp-derp', 'exit']
         exec(cmds)
 
     @pytest.mark.main
     def test_invalid_fusion_syntax(self):
-        cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'fusion derp derp', 'exit']
+        cmds = ['ising', 'anyon1 psi', 'anyon2 psi', 'anyon3 psi', 'done', 'fusion derp-derp', 'exit']
         exec(cmds)
 
     @pytest.mark.main

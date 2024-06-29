@@ -1,4 +1,5 @@
 from Model import Model
+from anyon_braiding_simulator import State
 
 
 class Simulator:
@@ -8,6 +9,8 @@ class Simulator:
         user must first initialize the model and anyons.
         """
         self._anyons = []
+        self._fusion = None
+        self._braid = None
         self._model = None
         self._dim_of_anyon_pos = 2  # Default is 2D anyon positions
 
@@ -49,6 +52,38 @@ class Simulator:
         List the anyons currently in the simulator.
         """
         return self._anyons
+    
+    def get_state(self) -> State:
+        """
+        Initializes the state of the simulator.
+        """
+        state = State()
+        for anyon in self._anyons:
+            state.add_anyon(anyon)
+        return state
+        
+    def pairs_to_indices(self, anyon_pairs: list) -> list:
+        """
+        Convert anyon names to indices and collect them in a list of tuples.
+        """
+        anyon_indices = []
+        for anyon_A, anyon_B in anyon_pairs:
+            try:
+                index_1 = self.get_anyon_index(anyon_A)
+                index_2 = self.get_anyon_index(anyon_B)
+                anyon_indices.append((index_1, index_2))
+            except ValueError:
+                raise
+        return anyon_indices
+
+    def get_anyon_index(self, anyon_name: str) -> int:
+        """
+        Get the index of two anyons from their names. 
+        """
+        for index, anyon in enumerate(self._anyons):
+            if anyon.name == anyon_name:
+                return index
+        raise ValueError(f'Anyon with name {anyon_name} not found.')
 
     def get_dim_of_anyon_pos(self) -> int:
         """
