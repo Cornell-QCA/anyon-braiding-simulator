@@ -1,12 +1,12 @@
 # Standard Library
 import cmd
-import subprocess
 import sys
 
 from anyon_braiding_simulator.anyon_braiding_simulator import (
     Anyon,
     AnyonModel,
     FibonacciTopoCharge,
+    Fusion,
     IsingTopoCharge,
     TopoCharge,
 )
@@ -56,8 +56,7 @@ def anyon(*args):
         # Make sure any previous anyons were specified in 1D space (i.e. without a position argument)
         if anyons and sim.get_dim_of_anyon_pos() == 2:
             print(
-                'Error: you have already provided an anyon in 2D space, so the rest must also have a \
-                    specified 2D position'
+                '\nError: you have already provided an anyon in 2D space, so the rest must also have a specified 2D position'
             )
             return
         elif not anyons:
@@ -69,14 +68,14 @@ def anyon(*args):
         # Make sure any previous anyons were specified in 2D space
         if sim.get_dim_of_anyon_pos() == 1:
             print(
-                'Error: you have already provided an anyon in 1D space, so the positions of the rest \
-                    cannot be specified in 2D'
+                '\nError: you have already provided an anyon in 1D space, so the positions of the rest cannot be specified in 2D'
             )
             return
 
         try:
             position = tuple(map(float, args[2].replace('{', '').replace('}', '').split(',')))
-            position[1]
+            if len(position) != 2:
+                raise ValueError
         except ValueError:
             print('Error: position must be formatted as {x,y} where x and y are numbers')
             return
@@ -88,9 +87,9 @@ def anyon(*args):
     try:
         sim.update_anyons(True, [new_anyon])
         if len(args) == 2:
-            print(f'Created anyon {name} with TC {topological_charge} at position {position[0]} in 1D')
+            print(f'\nCreated anyon {name} with TC {topological_charge} at position {position[0]} in 1D.')
         else:
-            print(f'Created anyon {name} with TC {topological_charge} at position {position} in 2D')
+            print(f'\nCreated anyon {name} with TC {topological_charge} at position {position} in 2D.')
     except ValueError:
         print('Error: An anyon with the same name already exists')
 
@@ -114,30 +113,6 @@ def model(*args):
     model = Model(model_convert[model_type.lower()])
     sim.set_model(model)
 
-
-def fusion(*args):
-    """
-    Handle the fusion command. This command executes the various fusion operations.
-    """
-    if len(args) < 1:
-        print('Error: Not enough arguments')
-        return
-
-    # fusion = Fusion()
-    cmd = args[0]
-
-    if cmd.lower() == 'fuse':
-        # anyon_indices = [sim.list_anyons().index(anyon) for anyon in args[1:]]
-        # fusion.fuse(*anyon_indices)
-        pass
-
-    elif cmd.lower() == 'print':
-        # print(fusion)
-        pass
-    else:
-        print('Error: Unknown fusion command')
-
-
 def braid(*args):
     """
     Handle the braid command. This command executes the various braid operations.
@@ -147,11 +122,24 @@ def braid(*args):
         print('Error: Not enough arguments')
         return
 
-    braid = Braid(sim.list_anyons())
+    braid = sim._braid
     cmd = args[0]
 
     if cmd.lower() == 'swap':
-        braid.swap(args[1], args[2])
+        if len(args) < 2:
+            print('Error: Not enough arguments for swap')
+            return
+        
+        # Parse the anyon name pairs and convert to indices
+        try:
+            anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
+            anyon_indices = sim.pairs_to_indices(anyon_pairs)
+        except ValueError:
+            print('\nError: A given anyon name does not exist in the simulator.')
+            return
+
+        # Perform the swap operations
+        braid.swap(anyon_indices)
     elif cmd.lower() == 'print':
         print(braid)
     else:
@@ -163,13 +151,12 @@ class SimulatorShell(cmd.Cmd):
 
     def __init__(self):
         super().__init__()
-        self.prompt = 'simulator> '
+        self.prompt = '\nsimulator> '
 
         self.command_options = {
             'anyon': 'anyon <name> <topological charge> <{x,y} coords>',
             'model': 'model <Ising or Fibonacci>',
-            'fusion': 'fusion anyon_name_1 anyon_name_2 ...',
-            'braid': 'braid anyon_name_1 anyon_name_2 ...',
+            'braid': 'braid anyon_name_1-anyon_name_2 ...',
             'list': 'list',
         }
 
@@ -194,18 +181,35 @@ class SimulatorShell(cmd.Cmd):
             if no_anyons:
                 user_input = input(
                     '\nEnter the anyon name, topological charge, and optionally, the 2D position.'
-                    '\nUse the format <name> <topological charge> <{x,y}>.\n'
+                    '\nUse the format "<name> <topological charge> <{x,y}>".\n'
                     '> '
                 )
             else:
-                user_input = input('\nContinue adding anyons, or type "done" when finished initializing.\n' '> ')
+                user_input = input('\nContinue adding anyons (at least 3 total), or type "done" when finished initializing.\n' '> ')
 
             if user_input.lower() == 'exit':
                 sys.exit(0)
-            elif user_input.lower() == 'done':
+            elif user_input.lower() == 'done' and len(sim.list_anyons()) >= 3:
+                sim._fusion = Fusion(sim.get_state())
+                sim._braid = Braid(sim.get_state(), sim.get_model())
                 break
+            elif user_input.lower() == 'done' and len(sim.list_anyons()) < 3:
+                print('\nError: At least 3 anyons are required to initialize the simulation.')
+                continue
 
-            args = user_input.split(' ')
+            # Check for 2D position in input such that space is allowed (ex. {4, 5})
+            if '{' in user_input and '}' in user_input:
+                start = user_input.find('{')
+                end = user_input.find('}') + 1
+                coords = user_input[start:end]
+
+                mod_input = user_input.replace(coords, "COORDS_PLACEHOLDER")
+                args = mod_input.split()
+                # Replace placeholder with original coords (spaces removed)
+                args[args.index("COORDS_PLACEHOLDER")] = coords.replace(" ", "")
+            else:
+                args = user_input.split(' ')
+
             if len(args) < 2 or len(args) > 3:
                 print('Error: There should be either 2 or 3 arguments')
                 continue
@@ -214,14 +218,6 @@ class SimulatorShell(cmd.Cmd):
             no_anyons = False
 
         self.init_complete = True
-
-    def do_shell(self, arg):
-        "Run a shell command"
-        print('running shell command:', arg)
-        subprocess.run(
-            arg,
-            shell=True,
-        )
 
     def do_anyon(self, arg):
         "Add an anyon to the simulation"
@@ -248,14 +244,6 @@ class SimulatorShell(cmd.Cmd):
         else:
             model(*args)
 
-    def do_fusion(self, arg):
-        "Fuse anyons together"
-        args = arg.split(' ')
-        if args[0] == 'help' or args[0] == '-h':
-            print(self.command_options['fusion'])
-        else:
-            fusion(*args)
-
     def do_braid(self, arg):
         "Braid anyons together"
         args = arg.split(' ')
@@ -279,8 +267,8 @@ class SimulatorShell(cmd.Cmd):
 
     def do_help(self, arg):
         "Print help"
-        cmds = ['anyon', 'model', 'fusion', 'braid', 'exit', 'list']
-        print(f'Commands: {", ".join(sorted(cmds))}')
+        cmds = ['braid', 'exit', 'list']
+        print(f'\nCommands: {", ".join(sorted(cmds))}')
 
 
 if __name__ == '__main__':
