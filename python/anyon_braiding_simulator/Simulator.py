@@ -72,9 +72,9 @@ class Simulator:
                 index_1 = self.get_anyon_index(anyon_A)
                 index_2 = self.get_anyon_index(anyon_B)
                 anyon_indices.append((index_1, index_2))
-                return anyon_indices
             except ValueError:
                 raise
+        return anyon_indices
 
     def get_anyon_index(self, anyon_name: str) -> int:
         """
