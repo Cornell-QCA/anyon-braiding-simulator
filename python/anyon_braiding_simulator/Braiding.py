@@ -58,7 +58,7 @@ class Braid:
                 continue
 
             # Perform the swap
-            self.get_anyons()[index_A], self.get_anyons()[index_B] = self.get_anyons()[index_B], self.get_anyons()[index_A]
+            self.state.swap_anyons(index_A, index_B)
             self.swaps[time].append((index_A, index_B))
             used_indices.add(index_A)
             used_indices.add(index_B)
@@ -161,7 +161,7 @@ class Braid:
         Prints the ASCII representation of the swaps performed.
         """
         if not self.swaps:
-            print('No swaps to print')
+            print('\nNo swaps to print')
             return ''
 
         # Initialize the output for each anyon

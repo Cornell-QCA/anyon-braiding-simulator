@@ -51,7 +51,7 @@ def test_remove_anyon(state):
     result = state.remove_anyon(non_existent_anyon)
     assert result is False  # Verify that removal of non-existent anyon fails
 
-
+@pytest.mark.state
 def test_add_operation(state):
     for i in range(101):
         anyon = Anyon(f'{i}', TopoCharge.from_ising(IsingTopoCharge.Sigma), (0, 0))
@@ -66,3 +66,16 @@ def test_add_operation(state):
     assert state.add_operation(1, FusionPair(4, 5))
     assert state.add_operation(2, FusionPair(2, 4))
     assert state.add_operation(3, FusionPair(0, 2))
+
+@pytest.mark.state
+def test_swap_anyons(state):
+    anyon1 = Anyon("Anyon1", TopoCharge.from_ising(IsingTopoCharge.Sigma), (0, 0))
+    anyon2 = Anyon("Anyon2", TopoCharge.from_ising(IsingTopoCharge.Sigma), (1, 1))
+    anyon3 = Anyon("Anyon3", TopoCharge.from_ising(IsingTopoCharge.Sigma), (1, 2))
+    state.add_anyon(anyon1)
+    state.add_anyon(anyon2)
+    state.add_anyon(anyon3)
+
+    state.swap_anyons(0, 1)
+    swapped_anyons = state.anyons
+    assert swapped_anyons[0].name == "Anyon2" and swapped_anyons[1].name == "Anyon1", "Anyons were not swapped correctly"

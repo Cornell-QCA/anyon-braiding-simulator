@@ -29,10 +29,10 @@ class Simulator:
                 for anyon_in_sim in self.list_anyons():
                     if anyon_in_sim.name == anyon.name:
                         raise ValueError('Anyon name is already in simulator')
-                self._state.add_anyon(anyon)
+                self.get_state().add_anyon(anyon)
         else:
             for anyon in anyons:
-                self._state.remove_anyon(anyon)
+                self.get_state().remove_anyon(anyon)
 
     def set_model(self, model: Model) -> None:
         """
@@ -58,7 +58,7 @@ class Simulator:
         """
         List the anyons currently in the simulator.
         """
-        return self._state.anyons
+        return self.get_state().anyons
         
     def pairs_to_indices(self, anyon_pairs: list) -> list:
         """
