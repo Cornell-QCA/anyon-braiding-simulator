@@ -1,12 +1,12 @@
 # Standard Library
 import cmd
-import subprocess
 import sys
 
 from anyon_braiding_simulator.anyon_braiding_simulator import (
     Anyon,
     AnyonModel,
     FibonacciTopoCharge,
+    Fusion,
     IsingTopoCharge,
     TopoCharge,
 )
@@ -122,11 +122,24 @@ def braid(*args):
         print('Error: Not enough arguments')
         return
 
-    braid = Braid(sim.list_anyons())
+    braid = sim._braid
     cmd = args[0]
 
     if cmd.lower() == 'swap':
-        braid.swap(args[1], args[2])
+        if len(args) < 2:
+            print('Error: Not enough arguments for swap')
+            return
+        
+        # Parse the anyon name pairs and convert to indices
+        try:
+            anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
+            anyon_indices = sim.pairs_to_indices(anyon_pairs)
+        except ValueError:
+            print('\nError: A given anyon name does not exist in the simulator.')
+            return
+
+        # Perform the swap operations
+        braid.swap(anyon_indices)
     elif cmd.lower() == 'print':
         print(braid)
     else:
@@ -143,7 +156,7 @@ class SimulatorShell(cmd.Cmd):
         self.command_options = {
             'anyon': 'anyon <name> <topological charge> <{x,y} coords>',
             'model': 'model <Ising or Fibonacci>',
-            'braid': 'braid anyon_name_1 anyon_name_2 ...',
+            'braid': 'braid anyon_name_1-anyon_name_2 ...',
             'list': 'list',
         }
 
@@ -172,12 +185,17 @@ class SimulatorShell(cmd.Cmd):
                     '> '
                 )
             else:
-                user_input = input('\nContinue adding anyons, or type "done" when finished initializing.\n' '> ')
+                user_input = input('\nContinue adding anyons (at least 3 total), or type "done" when finished initializing.\n' '> ')
 
             if user_input.lower() == 'exit':
                 sys.exit(0)
-            elif user_input.lower() == 'done':
+            elif user_input.lower() == 'done' and len(sim.list_anyons()) >= 3:
+                sim._fusion = Fusion(sim.get_state())
+                sim._braid = Braid(sim.get_state(), sim.get_model())
                 break
+            elif user_input.lower() == 'done' and len(sim.list_anyons()) < 3:
+                print('\nError: At least 3 anyons are required to initialize the simulation.')
+                continue
 
             # Check for 2D position in input such that space is allowed (ex. {4, 5})
             if '{' in user_input and '}' in user_input:
