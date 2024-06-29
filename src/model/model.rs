@@ -18,4 +18,24 @@ impl AnyonModel {
         AnyonModel::Ising
     }
 }
+// Commenting out Model for now because it has no use atm We might port the
+// python stuff to rust later, but for now we have no use
 
+/// The parameters accompanying a model
+/// More docs later when we impl stuff from python
+#[pyclass]
+pub struct Model {
+    model_type: AnyonModel,
+    // more fields which we'll impl later
+}
+
+#[pymethods]
+impl Model {
+    #[new]
+    fn new() -> Self {
+        // Model { model_type }
+        Model {
+            model_type: AnyonModel::Ising,
+        }
+    }
+}

@@ -5,6 +5,7 @@ from anyon_braiding_simulator.anyon_braiding_simulator import (
     Fusion,
     FusionPair,
     IsingTopoCharge,
+    FibonacciTopoCharge,
     State,
     TopoCharge,
 )

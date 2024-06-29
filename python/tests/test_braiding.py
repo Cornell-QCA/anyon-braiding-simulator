@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'a
 
 from Braiding import Braid
 from Model import Model
-from anyon_braiding_simulator import Anyon, AnyonModel, IsingTopoCharge, TopoCharge, State, FusionPair
+from anyon_braiding_simulator import Anyon, AnyonModel, IsingTopoCharge, FibonacciTopoCharge, TopoCharge, State, FusionPair
 
 
 @pytest.fixture
@@ -159,7 +159,7 @@ def test_qubit_enc(setup_state):
     correct = [FusionPair(0, 1), FusionPair(2, 4), FusionPair(2, 3)]
 
     # Confirm qubit_enc is working as expected
-    assert set(map(str, braid.fusion.qubit_enc(braid.model.model_type))) == set(map(str, correct))
+    assert set(map(str, braid.fusion.qubit_enc())) == set(map(str, correct))
 
 def test_swap_to_qubit(setup_state):
     braid = setup_state
