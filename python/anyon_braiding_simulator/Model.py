@@ -5,7 +5,6 @@ from itertools import product
 import numpy as np
 from anyon_braiding_simulator import AnyonModel
 
-
 class Model:
     def __init__(self, model_type: AnyonModel, num_fusion_channels=5) -> None:
         """
@@ -19,10 +18,14 @@ class Model:
         4th index corresponding to the upper index of the F matrix
         (which physically corresponds to the anyon resulting from fusion)
 
-        Indices correspond to anyon types as follows:
+        Indices correspond to anyon types as follows for the Ising Model:
             0 = vacuum state/ trivial anyon
             1 = sigma
             2 = psi
+
+        Indices correspond to anyon types as follows for the Fibonacci Model:
+            0 = vacuum state
+            1 = tau
 
         For details on notation, c.f.r. On classification of modular tensor
         categories by Rowell, Stong, and Wang
@@ -49,7 +52,16 @@ class Model:
         elif model_type == AnyonModel.Fibonacci:
             self._charges = {'vacuum', 'psi'}
             self._r_mtx = np.array([[cmath.exp(4 * np.pi * 1j / 5), 0], [0, -1 * cmath.exp(2 * np.pi * 1j / 5)]])
-            self._f_mtx = []
+            
+            self._f_mtx = np.zeros((3, 3, 3, 3, 2, 2))
+            golden = (1 + 5**0.5)/2
+            self._f_mtx[1][1][1][1] = np.array([[golden**(-1), golden**(-0.5)], [golden**(-0.5), -1*golden**(-1)]])
+
+            for w, x, y, z in product(range(3), repeat=4):
+                self._f_mtx[w][x][y][z] = np.identity(2)
+
+            
+
             self._rules = []
         elif model_type == AnyonModel.Custom:
             raise NotImplementedError('Custom Models not yet implemented')
