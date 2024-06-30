@@ -89,6 +89,7 @@ def test_braid_str(setup_state_and_anyons):
     braid.swap([(3, 2)])
 
     expected = [
+        '    A   B   C   D',
         '    \\   /   \\   /',
         '    \\ /     \\ /',
         '     \\       \\',
@@ -103,7 +104,8 @@ def test_braid_str(setup_state_and_anyons):
         '   |   |    \\ /',
         '   |   |     /',
         '   |   |    / \\ ',
-        '   |   |   /   \\'
+        '   |   |   /   \\',
+        '    B   D   C   A'
     ]
     # Get string representation of the braid
     output = str(braid).strip().split('\n')
@@ -208,15 +210,15 @@ def test_direct_swap(setup_braid):
     braid.swap([(0, 3)])
     assert braid.is_direct_swap(0, 3) == False
 
-def test_generate_overall_unitary(setup_braid):
+def test_generate_overall_swap_matrix(setup_braid):
     braid = setup_braid
 
     # Perform valid adjacent swaps
     braid.swap([(0, 1)])
-    unitary = braid.generate_overall_unitary(1, 0)
+    swap_matrix = braid.generate_overall_swap_matrix(1, 0)
 
     # Assert the unitary matrix matches the expected matrix
-    assert np.shape(unitary) == (64, 64)
+    assert np.shape(swap_matrix) == (64, 64)
 
 
 if __name__ == '__main__':

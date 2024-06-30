@@ -10,7 +10,7 @@ class Braid:
         - model (Model): Model to use for the braid simulation
         """
         self.state = state
-        self.anyons = state.anyons
+        self.anyons = state.anyons.copy()
         self.initial_anyons = [anyon.name for anyon in state.anyons]
         self.swaps = []
         self.model = model
@@ -55,7 +55,7 @@ class Braid:
                 continue
 
             # Perform the swap
-            self.state.swap_anyons(index_A, index_B)
+            self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
             self.swaps[time].append((index_A, index_B))
             used_indices.add(index_A)
             used_indices.add(index_B)
