@@ -11,6 +11,7 @@ class Braid:
         """
         self.state = state
         self.anyons = state.anyons
+        self.initial_anyons = [anyon.name for anyon in state.anyons]
         self.swaps = []
         self.model = model
         self.fusion = Fusion(state)
@@ -54,7 +55,7 @@ class Braid:
                 continue
 
             # Perform the swap
-            self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
+            self.state.swap_anyons(index_A, index_B)
             self.swaps[time].append((index_A, index_B))
             used_indices.add(index_A)
             used_indices.add(index_B)
@@ -111,23 +112,23 @@ class Braid:
 
         return swap_matrix
 
-    def generate_overall_unitary(self, time: int, swap_index: int) -> np.ndarray:
+    def generate_overall_swap_matrix(self, time: int, swap_index: int) -> np.ndarray:
         qubit_encoding = self.fusion.qubit_enc(self.model.model_type)
         if qubit_encoding is None:
             raise ValueError("Fusion qubit encoding returned None")
 
         num_qubits = len(self.fusion.qubit_enc(self.model.model_type))
-        unitary = np.eye(2**num_qubits)  # Start with identity matrix of appropriate size
+        overall_swap_matrix = np.eye(2**num_qubits)  # Start with identity matrix of appropriate size
 
         for i in range(num_qubits):
             swap_qubit_index = self.swap_to_qubit(time, swap_index)
             if i == swap_qubit_index:
                 swap_matrix = self.generate_swap_matrix(time, swap_index)
-                unitary = np.kron(unitary, swap_matrix)
+                overall_swap_matrix = np.kron(overall_swap_matrix, swap_matrix)
             else:
-                unitary = np.kron(unitary, np.eye(2))  # Kronecker with identity for non-involved qubits
+                overall_swap_matrix = np.kron(overall_swap_matrix, np.eye(2))  # Kronecker with identity for non-involved qubits
 
-        return unitary
+        return overall_swap_matrix
 
     def is_direct_swap(self, index_A: int, index_B: int) -> bool:
         """
@@ -163,15 +164,19 @@ class Braid:
         # Initialize the output for each anyon
         num_anyons = len(self.anyons)
         max_time = len(self.swaps)  # Max time is now the length of the swaps list
-        max_rows = max_time * 5
+        max_rows = max_time * 5 + 2  # Add extra rows for the names
         output = [[' ' for _ in range(num_anyons * 5)] for _ in range(max_rows)]
         spacing = 4  # 3 spaces between cols
+
+        # Add the anyon names at the top
+        for col, anyon in enumerate(self.initial_anyons):
+            output[0][col * spacing + 4] = anyon[0]  # Assumes single character names
 
         # Iterate through each time step
         for time_step in range(1, max_time + 1):
             # Add '|' for non-swap columns
             for col in range(num_anyons):
-                base = (time_step - 1) * 5
+                base = (time_step - 1) * 5 + 1  # Shift by 1 to account for names
                 # Check if the column is not involved in any swap at the current time step
                 if not any(col in swap for swap in self.swaps[time_step - 1]):
                     for i in range(5):
@@ -179,7 +184,7 @@ class Braid:
 
             # Iterate through each swap operation at the current time step
             for index_A, index_B in self.swaps[time_step - 1]:
-                base = (time_step - 1) * 5  # Base for each swap operation
+                base = (time_step - 1) * 5 + 1  # Shift by 1 to account for names
                 if index_A < index_B:
                     for i in range(3):
                         output[base + i][index_A * spacing + 4 + i] = '\\'
@@ -196,6 +201,11 @@ class Braid:
                     for i in range(3, 5):
                         output[base + i][index_B * spacing + 4 + (5 - i - 1)] = '/'
                         output[base + i][index_A * spacing + 4 - (5 - i - 1)] = '\\'
+
+        # Add the anyon names at the bottom after the final swaps
+        for col, anyon in enumerate(self.anyons):
+            name = anyon.name
+            output[max_rows - 1][col * spacing + 4] = name[0]  # Assumes single character names
 
         # Convert the output grid to a string and remove trailing empty rows
         return '\n'.join([''.join(row) for row in output if any(c != ' ' for c in row)])

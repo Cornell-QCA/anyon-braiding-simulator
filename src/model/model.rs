@@ -26,6 +26,7 @@ impl AnyonModel {
 /// More docs later when we impl stuff from python
 #[pyclass]
 pub struct Model {
+    #[allow(dead_code)]
     model_type: AnyonModel,
     // more fields which we'll impl later
 }

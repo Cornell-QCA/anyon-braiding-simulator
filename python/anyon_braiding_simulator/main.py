@@ -130,16 +130,14 @@ def braid(*args):
             print('Error: Not enough arguments for swap')
             return
         
-        # Parse the anyon name pairs and convert to indices
-        try:
-            anyon_pairs = [tuple(anyon.replace('-', ' ').split()) for anyon in args[1:]]
-            anyon_indices = sim.pairs_to_indices(anyon_pairs)
-        except ValueError:
-            print('\nError: A given anyon name does not exist in the simulator.')
-            return
+        pairs = args[1:]
 
-        # Perform the swap operations
-        braid.swap(anyon_indices)
+        try:
+            valid_pairs = sim.validate_and_parse_pairs(pairs)
+        except ValueError as e:
+            return str(e)
+        
+        braid.swap(valid_pairs)
     elif cmd.lower() == 'print':
         print(braid)
     else:
