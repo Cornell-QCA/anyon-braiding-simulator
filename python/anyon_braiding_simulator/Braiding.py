@@ -74,7 +74,7 @@ class Braid:
         index_A, index_B = swap[swap_index]
 
         # Iterate through the qubit encoding to find the matching qubit
-        for qubit_index, fusion_pair in enumerate(self.fusion.qubit_enc(self.model.model_type)):
+        for qubit_index, fusion_pair in enumerate(self.fusion.qubit_enc()):
             if {index_A, index_B} == {fusion_pair.anyon_1, fusion_pair.anyon_2}:
                 return qubit_index
 
@@ -112,11 +112,11 @@ class Braid:
         return swap_matrix
 
     def generate_overall_unitary(self, time: int, swap_index: int) -> np.ndarray:
-        qubit_encoding = self.fusion.qubit_enc(self.model.model_type)
+        qubit_encoding = self.fusion.qubit_enc()
         if qubit_encoding is None:
             raise ValueError("Fusion qubit encoding returned None")
 
-        num_qubits = len(self.fusion.qubit_enc(self.model.model_type))
+        num_qubits = len(self.fusion.qubit_enc())
         unitary = np.eye(2**num_qubits)  # Start with identity matrix of appropriate size
 
         for i in range(num_qubits):
