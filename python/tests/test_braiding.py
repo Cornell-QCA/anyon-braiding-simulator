@@ -22,10 +22,10 @@ def setup_state_and_anyons():
     ]
     for anyon in anyons:
         state.add_anyon(anyon)
-    return state, anyons, model
+    return state, model
 
 def test_braid_initialization(setup_state_and_anyons):
-    state, anyons, model = setup_state_and_anyons
+    state, model = setup_state_and_anyons
     
     # Test with valid anyons
     braid = Braid(state, model)
@@ -35,13 +35,13 @@ def test_braid_initialization(setup_state_and_anyons):
     # Test with fewer than 3 anyons
     with pytest.raises(ValueError, match='There must be at least 3 anyons'):
         state_few = State()
-        for anyon in anyons[:2]:
+        for anyon in braid.anyons[:2]:
             state_few.add_anyon(anyon)
         Braid(state_few, model)
 
     # Test with duplicate anyon names
     state_duplicate = State()
-    duplicate_anyons = anyons[:]
+    duplicate_anyons = braid.anyons[:]
     duplicate_anyons[3] = Anyon('A', TopoCharge.from_ising(IsingTopoCharge.Psi), (4, 4))
     for anyon in duplicate_anyons:
         state_duplicate.add_anyon(anyon)
@@ -49,7 +49,7 @@ def test_braid_initialization(setup_state_and_anyons):
         Braid(state_duplicate, model)
 
 def test_braid_swap(setup_state_and_anyons):
-    state, _, model = setup_state_and_anyons
+    state, model = setup_state_and_anyons
     braid = Braid(state, model)
 
     # Test valid swaps
@@ -80,7 +80,7 @@ def test_braid_swap(setup_state_and_anyons):
     assert braid.swaps[2] == [(1, 2)]
 
 def test_braid_str(setup_state_and_anyons):
-    state, _, model = setup_state_and_anyons
+    state, model = setup_state_and_anyons
     braid = Braid(state, model)
     
     # Perform swaps
@@ -124,7 +124,7 @@ def test_braid_str(setup_state_and_anyons):
 ])
 
 def test_parametrized_swaps(swaps, expected, setup_state_and_anyons):
-    state, _, model = setup_state_and_anyons
+    state, model = setup_state_and_anyons
     braid = Braid(state, model)
 
     # Perform swaps
@@ -143,6 +143,8 @@ def setup_state():
     for i in range(6):
         state.add_anyon(Anyon(f'{i}', TopoCharge.from_ising(IsingTopoCharge.Sigma), (0, 0)))
     
+    model = Model(AnyonModel.Ising)
+
     # Add fusion operations
     state.add_operation(1, FusionPair(0, 1))
     state.add_operation(1, FusionPair(2, 3))
@@ -151,7 +153,7 @@ def setup_state():
     state.add_operation(3, FusionPair(0, 2))
 
     # Initialize the braid with the given state and model type
-    braid = Braid(state, Model(AnyonModel.Ising))
+    braid = Braid(state, model)
     
     return braid
 
@@ -173,7 +175,6 @@ def test_swap_to_qubit(setup_state):
     # Swap (2, 3) at time 2
     braid.swap([(2, 3)])
     assert braid.swap_to_qubit(2, 0) == 1    # Verify the qubit index is 1
-
 
 @pytest.fixture
 def setup_braid():
@@ -221,5 +222,22 @@ def test_generate_overall_swap_matrix(setup_braid):
     assert np.shape(swap_matrix) == (64, 64)
 
 
-if __name__ == '__main__':
-    pytest.main(['-v', __file__])
+# if __name__ == '__main__':
+#     pytest.main(['-v', __file__])
+
+state = State()
+for i in range(6):
+    state.add_anyon(Anyon(f'{i}', TopoCharge.from_ising(IsingTopoCharge.Sigma), (0, 0)))
+
+state.set_anyon_model(AnyonModel.Ising)
+model = Model(AnyonModel.Ising)
+
+# Add fusion operations
+state.add_operation(1, FusionPair(0, 1))
+state.add_operation(1, FusionPair(2, 3))
+state.add_operation(1, FusionPair(4, 5))
+state.add_operation(2, FusionPair(2, 4))
+state.add_operation(3, FusionPair(0, 2))
+
+# Initialize the braid with the given state and model type
+braid = Braid(state, model)

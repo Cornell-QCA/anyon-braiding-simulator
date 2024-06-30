@@ -30,7 +30,6 @@ class Braid:
         Swaps the positions of anyons in list "anyons" based on provided swaps to occur at the present time
 
         Parameters:
-        - time (int): Time step at which the swaps are performed
         - swaps (list): List of tuples where each tuple is a pair of anyon indices to swap
 
         Swaps only adjacent anyons
@@ -54,11 +53,13 @@ class Braid:
                 print(f'One or both indices ({index_A}, {index_B}) are already used at time {time}')
                 continue
 
-            # Perform the swap
-            self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
-            self.swaps[time].append((index_A, index_B))
-            used_indices.add(index_A)
-            used_indices.add(index_B)
+            if len(set([index_A, index_B])) == 2 and abs(index_A - index_B) == 1 and index_A in used_indices or index_B not in used_indices:
+                # Perform the swap
+                self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
+                # self.state.anyons = self.anyons
+                self.swaps[time].append((index_A, index_B))
+                used_indices.add(index_A)
+                used_indices.add(index_B)
 
     def swap_to_qubit(self, time: int, swap_index: int) -> int:
         """
@@ -106,13 +107,42 @@ class Braid:
             swap_matrix = self.model._r_mtx
         else:
             # Indices not adjacent, need basis transformation
-            swap_matrix = np.linalg.inv(self.model._f_mtx)
-            swap_matrix = np.dot(swap_matrix, self.model._r_mtx)
-            swap_matrix = np.dot(swap_matrix, self.model._f_mtx)
-
+            fusion_operations = self.state.operations()
+            
+            # Find the fusion pair that affects index_A and index_B
+            fusion_pair_operation = None
+            for t, operation in fusion_operations:
+                if t == time:
+                    if (operation.anyon_1() == index_A and operation.anyon_2() == index_B) or \
+                    (operation.anyon_1() == index_B and operation.anyon_2() == index_A):
+                        fusion_pair_operation = operation
+                        break
+            
+            if fusion_pair_operation:
+                # Extract names of the anyons involved
+                a_name = self.anyons[index_A].name
+                b_name = self.anyons[index_B].name
+                c_name = self.anyons[fusion_pair_operation.anyon_1()].name
+                d_name = self.anyons[fusion_pair_operation.anyon_2()].name
+                
+                # Call getFInvRF with the names
+                swap_matrix = self.model.getFInvRF(a_name, b_name, c_name, d_name)
+            else:
+                raise ValueError("No valid fusion operation found")
+            
         return swap_matrix
 
     def generate_overall_swap_matrix(self, time: int, swap_index: int) -> np.ndarray:
+        """
+        Returns the overall swap matrix by appropriately applying the Kroneker product with the identity to the R/FInvRF matrix at the appropriate qubits
+
+        Parameters:
+        - time (int): Time step at which the swap(s) are performed
+        - swap_index (int): Index of the swap operation in the swaps list
+
+        Returns:
+        - np.ndarray: Overall swap matrix for the given time and swap index
+        """
         qubit_encoding = self.fusion.qubit_enc(self.model.model_type)
         if qubit_encoding is None:
             raise ValueError("Fusion qubit encoding returned None")
@@ -152,10 +182,10 @@ class Braid:
         
         # No fusion operation found at time 1 for the given indices
         return False
-    
+
     def __str__(self) -> str:
         """
-        Prints the ASCII representation of the swaps performed.
+        Prints the ASCII representation of the swaps performed and the anyons before and after all swaps
         """
         if not self.swaps:
             print('No swaps to print')

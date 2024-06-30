@@ -1,6 +1,7 @@
 use crate::{fusion::fusion::FusionPair, model::anyon::Anyon, model::model::AnyonModel};
 use crate::util::statevec::StateVec;
 use pyo3::prelude::*;
+use pyo3::wrap_pyfunction;
 
 /// The state of the system
 #[pyclass]
@@ -89,7 +90,19 @@ impl State {
 
         Ok(true)
     }
+
+    // Sets the anyon model
     fn set_anyon_model(&mut self, model:AnyonModel){
         self.anyon_model=model;
+    }
+
+    /// Swaps the elements in the anyons field corresponding to given indices
+    fn swap_anyons(&mut self, index_a: usize, index_b: usize) -> PyResult<bool> {
+        if index_a >= self.anyons.len() || index_b >= self.anyons.len() {
+            panic!("Index out of bounds");
+        }
+        self.anyons.swap(index_a, index_b);
+
+        Ok(true)
     }
 }

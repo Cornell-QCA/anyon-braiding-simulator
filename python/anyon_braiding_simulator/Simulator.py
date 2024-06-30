@@ -77,7 +77,7 @@ class Simulator:
         """
         Get the index of two anyons from their names. 
         """
-        for index, anyon in enumerate(self._anyons):
+        for index, anyon in enumerate(self._braid.anyons):
             if anyon.name == anyon_name:
                 return index
         raise ValueError(f'Anyon with name {anyon_name} not found.')
