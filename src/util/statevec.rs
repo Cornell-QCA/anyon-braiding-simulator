@@ -3,7 +3,7 @@ use numpy::{Complex64, PyArray1, PyReadonlyArray1, ToPyArray};
 use pyo3::prelude::*;
 
 #[pyclass]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 /// State Vector for the system
 pub struct StateVec {
     vec: Array1<Complex64>,

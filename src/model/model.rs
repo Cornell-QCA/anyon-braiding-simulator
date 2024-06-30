@@ -4,7 +4,7 @@ use pyo3::prelude::*;
 
 /// Different Anyon models that can be used to simulate the system
 #[pyclass]
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum AnyonModel {
     Ising,
     Fibonacci,
@@ -18,7 +18,6 @@ impl AnyonModel {
         AnyonModel::Ising
     }
 }
-
 // Commenting out Model for now because it has no use atm We might port the
 // python stuff to rust later, but for now we have no use
 
@@ -39,5 +38,4 @@ impl Model {
             model_type: AnyonModel::Ising,
         }
     }
-
 }

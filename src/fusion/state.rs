@@ -89,7 +89,7 @@ impl State {
 
         Ok(true)
     }
-
+    
     /// Swaps the elements in the anyons field corresponding to given indices
     fn swap_anyons(&mut self, index_a: usize, index_b: usize) -> PyResult<bool> {
         if index_a >= self.anyons.len() || index_b >= self.anyons.len() {

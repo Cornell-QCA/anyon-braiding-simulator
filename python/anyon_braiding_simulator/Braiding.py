@@ -10,7 +10,6 @@ class Braid:
         - model (Model): Model to use for the braid simulation
         """
         self.state = state
-        self.anyons = state.anyons.copy()
         self.initial_anyons = [anyon.name for anyon in state.anyons]
         self.swaps = []
         self.model = model
@@ -21,7 +20,7 @@ class Braid:
             raise ValueError('There must be at least 3 anyons')
 
         # Check for duplicate anyon names
-        names = [anyon.name for anyon in self.anyons]
+        names = [anyon.name for anyon in self.state.anyons]
         if len(names) != len(set(names)):
             raise ValueError('Duplicate anyon names detected')
 
@@ -55,8 +54,7 @@ class Braid:
 
             if len(set([index_A, index_B])) == 2 and abs(index_A - index_B) == 1 and index_A in used_indices or index_B not in used_indices:
                 # Perform the swap
-                self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
-                # self.state.anyons = self.anyons
+                self.state.swap_anyons(index_A, index_B)
                 self.swaps[time].append((index_A, index_B))
                 used_indices.add(index_A)
                 used_indices.add(index_B)
@@ -98,7 +96,7 @@ class Braid:
         index_A, index_B = self.swaps[time-1][swap_index]
         
         # Check if indices are valid
-        if index_A < 0 or index_A >= len(self.anyons) or index_B < 0 or index_B >= len(self.anyons):
+        if index_A < 0 or index_A >= len(self.state.anyons) or index_B < 0 or index_B >= len(self.state.anyons):
             raise ValueError("Invalid anyon indices")
 
         # Check if index_A and index_B are adjacent in fusion operations
@@ -120,10 +118,10 @@ class Braid:
             
             if fusion_pair_operation:
                 # Extract names of the anyons involved
-                a_name = self.anyons[index_A].name
-                b_name = self.anyons[index_B].name
-                c_name = self.anyons[fusion_pair_operation.anyon_1()].name
-                d_name = self.anyons[fusion_pair_operation.anyon_2()].name
+                a_name = self.state.anyons[index_A].name
+                b_name = self.state.anyons[index_B].name
+                c_name = self.state.anyons[fusion_pair_operation.anyon_1()].name
+                d_name = self.state.anyons[fusion_pair_operation.anyon_2()].name
                 
                 # Call getFInvRF with the names
                 swap_matrix = self.model.getFInvRF(a_name, b_name, c_name, d_name)
@@ -192,7 +190,7 @@ class Braid:
             return ''
 
         # Initialize the output for each anyon
-        num_anyons = len(self.anyons)
+        num_anyons = len(self.state.anyons)
         max_time = len(self.swaps)  # Max time is now the length of the swaps list
         max_rows = max_time * 5 + 2  # Add extra rows for the names
         output = [[' ' for _ in range(num_anyons * 5)] for _ in range(max_rows)]
@@ -233,7 +231,7 @@ class Braid:
                         output[base + i][index_A * spacing + 4 - (5 - i - 1)] = '\\'
 
         # Add the anyon names at the bottom after the final swaps
-        for col, anyon in enumerate(self.anyons):
+        for col, anyon in enumerate(self.state.anyons):
             name = anyon.name
             output[max_rows - 1][col * spacing + 4] = name[0]  # Assumes single character names
 
