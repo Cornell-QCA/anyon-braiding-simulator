@@ -1,10 +1,10 @@
-use crate::{fusion::fusion::FusionPair, model::anyon::Anyon};
+use crate::{fusion::fusion::FusionPair, model::anyon::Anyon, model::model::AnyonModel};
 use crate::util::statevec::StateVec;
 use pyo3::prelude::*;
 
 /// The state of the system
 #[pyclass]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 /// Stores the overall state of the system. Use this struct to keep track of any
 /// common information throughout the simulation (e.g. anyons, operations,
 /// statevector).
@@ -13,6 +13,8 @@ pub struct State {
     anyons: Vec<Anyon>,
     #[pyo3(get)]
     operations: Vec<(u32, FusionPair)>,
+    #[pyo3(get)]
+    anyon_model: AnyonModel,
     #[pyo3(get)]
     state_vec: StateVec,
 }
@@ -25,6 +27,10 @@ impl State {
 
     pub fn operations(&self) -> Vec<(u32, FusionPair)> {
         self.operations.clone()
+    }
+
+    pub fn anyon_model(&self) -> AnyonModel{
+        self.anyon_model.clone()
     }
 
     /// Verify the operation
@@ -62,6 +68,7 @@ impl State {
         State {
             anyons: Vec::new(),
             operations: Vec::new(),
+            anyon_model: AnyonModel::Ising, //Assume model is Ising by default
             state_vec: StateVec::new(1, None),
         }
     }
@@ -81,5 +88,20 @@ impl State {
         self.operations.push((time, operation));
 
         Ok(true)
+    }
+
+    /// Swaps the elements in the anyons field corresponding to given indices
+    fn swap_anyons(&mut self, index_a: usize, index_b: usize) -> PyResult<bool> {
+        if index_a >= self.anyons.len() || index_b >= self.anyons.len() {
+            panic!("Index out of bounds");
+        }
+        self.anyons.swap(index_a, index_b);
+
+        Ok(true)
+    }
+
+    // Sets the anyon model
+    fn set_anyon_model(&mut self, model:AnyonModel){
+        self.anyon_model=model;
     }
 }

@@ -10,7 +10,8 @@ class Braid:
         - model (Model): Model to use for the braid simulation
         """
         self.state = state
-        self.anyons = state.anyons
+        self.anyons = state.anyons.copy()
+        self.initial_anyons = [anyon.name for anyon in state.anyons]
         self.swaps = []
         self.model = model
         self.fusion = Fusion(state)
@@ -29,7 +30,6 @@ class Braid:
         Swaps the positions of anyons in list "anyons" based on provided swaps to occur at the present time
 
         Parameters:
-        - time (int): Time step at which the swaps are performed
         - swaps (list): List of tuples where each tuple is a pair of anyon indices to swap
 
         Swaps only adjacent anyons
@@ -53,11 +53,13 @@ class Braid:
                 print(f'One or both indices ({index_A}, {index_B}) are already used at time {time}')
                 continue
 
-            # Perform the swap
-            self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
-            self.swaps[time].append((index_A, index_B))
-            used_indices.add(index_A)
-            used_indices.add(index_B)
+            if len(set([index_A, index_B])) == 2 and abs(index_A - index_B) == 1 and index_A in used_indices or index_B not in used_indices:
+                # Perform the swap
+                self.anyons[index_A], self.anyons[index_B] = self.anyons[index_B], self.anyons[index_A]
+                # self.state.anyons = self.anyons
+                self.swaps[time].append((index_A, index_B))
+                used_indices.add(index_A)
+                used_indices.add(index_B)
 
     def swap_to_qubit(self, time: int, swap_index: int) -> int:
         """
@@ -104,7 +106,7 @@ class Braid:
             # Direct swap using R matrix
             swap_matrix = self.model._r_mtx
         else:
-             # Indices not adjacent, need basis transformation
+            # Indices not adjacent, need basis transformation
             fusion_operations = self.state.operations()
             
             # Find the fusion pair that affects index_A and index_B
@@ -127,26 +129,36 @@ class Braid:
                 swap_matrix = self.model.getFInvRF(a_name, b_name, c_name, d_name)
             else:
                 raise ValueError("No valid fusion operation found")
-
+            
         return swap_matrix
 
-    def generate_overall_unitary(self, time: int, swap_index: int) -> np.ndarray:
+    def generate_overall_swap_matrix(self, time: int, swap_index: int) -> np.ndarray:
+        """
+        Returns the overall swap matrix by appropriately applying the Kroneker product with the identity to the R/FInvRF matrix at the appropriate qubits
+
+        Parameters:
+        - time (int): Time step at which the swap(s) are performed
+        - swap_index (int): Index of the swap operation in the swaps list
+
+        Returns:
+        - np.ndarray: Overall swap matrix for the given time and swap index
+        """
         qubit_encoding = self.fusion.qubit_enc(self.model.model_type)
         if qubit_encoding is None:
             raise ValueError("Fusion qubit encoding returned None")
 
         num_qubits = len(self.fusion.qubit_enc(self.model.model_type))
-        unitary = np.eye(2**num_qubits)  # Start with identity matrix of appropriate size
+        overall_swap_matrix = np.eye(2**num_qubits)  # Start with identity matrix of appropriate size
 
         for i in range(num_qubits):
             swap_qubit_index = self.swap_to_qubit(time, swap_index)
             if i == swap_qubit_index:
                 swap_matrix = self.generate_swap_matrix(time, swap_index)
-                unitary = np.kron(unitary, swap_matrix)
+                overall_swap_matrix = np.kron(overall_swap_matrix, swap_matrix)
             else:
-                unitary = np.kron(unitary, np.eye(2))  # Kronecker with identity for non-involved qubits
+                overall_swap_matrix = np.kron(overall_swap_matrix, np.eye(2))  # Kronecker with identity for non-involved qubits
 
-        return unitary
+        return overall_swap_matrix
 
     def is_direct_swap(self, index_A: int, index_B: int) -> bool:
         """
@@ -170,10 +182,10 @@ class Braid:
         
         # No fusion operation found at time 1 for the given indices
         return False
-    
+
     def __str__(self) -> str:
         """
-        Prints the ASCII representation of the swaps performed.
+        Prints the ASCII representation of the swaps performed and the anyons before and after all swaps
         """
         if not self.swaps:
             print('No swaps to print')
@@ -182,15 +194,19 @@ class Braid:
         # Initialize the output for each anyon
         num_anyons = len(self.anyons)
         max_time = len(self.swaps)  # Max time is now the length of the swaps list
-        max_rows = max_time * 5
+        max_rows = max_time * 5 + 2  # Add extra rows for the names
         output = [[' ' for _ in range(num_anyons * 5)] for _ in range(max_rows)]
         spacing = 4  # 3 spaces between cols
+
+        # Add the anyon names at the top
+        for col, anyon in enumerate(self.initial_anyons):
+            output[0][col * spacing + 4] = anyon[0]  # Assumes single character names
 
         # Iterate through each time step
         for time_step in range(1, max_time + 1):
             # Add '|' for non-swap columns
             for col in range(num_anyons):
-                base = (time_step - 1) * 5
+                base = (time_step - 1) * 5 + 1  # Shift by 1 to account for names
                 # Check if the column is not involved in any swap at the current time step
                 if not any(col in swap for swap in self.swaps[time_step - 1]):
                     for i in range(5):
@@ -198,7 +214,7 @@ class Braid:
 
             # Iterate through each swap operation at the current time step
             for index_A, index_B in self.swaps[time_step - 1]:
-                base = (time_step - 1) * 5  # Base for each swap operation
+                base = (time_step - 1) * 5 + 1  # Shift by 1 to account for names
                 if index_A < index_B:
                     for i in range(3):
                         output[base + i][index_A * spacing + 4 + i] = '\\'
@@ -215,6 +231,11 @@ class Braid:
                     for i in range(3, 5):
                         output[base + i][index_B * spacing + 4 + (5 - i - 1)] = '/'
                         output[base + i][index_A * spacing + 4 - (5 - i - 1)] = '\\'
+
+        # Add the anyon names at the bottom after the final swaps
+        for col, anyon in enumerate(self.anyons):
+            name = anyon.name
+            output[max_rows - 1][col * spacing + 4] = name[0]  # Assumes single character names
 
         # Convert the output grid to a string and remove trailing empty rows
         return '\n'.join([''.join(row) for row in output if any(c != ' ' for c in row)])
